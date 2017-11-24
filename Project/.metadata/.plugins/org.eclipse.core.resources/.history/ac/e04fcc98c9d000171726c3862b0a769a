@@ -1,0 +1,40 @@
+/*
+ * config_bluetooth.c
+ *
+ *  Created on: 2017. 11. 24.
+ *      Author: hw_3
+ */
+
+#include "config_bluetooth.h"
+
+void m_Init_USART3(){
+	m_Init_BT_USART(USART3);
+}
+
+void m_Init_USART2(){
+	m_Init_BT_USART(USART2);
+}
+void m_Init_BT_USART(USART_TypeDef* USARTx){
+	USART_InitTypeDef usart_init_;
+	usart_init_.USART_BaudRate = 9600;
+	usart_init_.USART_WordLength = USART_WordLength_8b;
+	usart_init_.USART_StopBits = USART_StopBits_1;
+	usart_init_.USART_Parity = USART_Parity_No;
+	usart_init_.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
+	usart_init_.USART_Mode = USART_Mode_Tx | USART_Mode_Rx;
+	USART_Init(USARTx, &usart_init_);
+}
+void m_Init_USART3_GPIOC(){
+	GPIO_InitTypeDef gpio_init_;
+	gpio_init_.GPIO_Pin = GPIO_Pin_10;
+	gpio_init_.GPIO_Mode = GPIO_Mode_AF_PP;
+	gpio_init_.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_Init(GPIOC, &gpio_init_);
+
+	gpio_init_.GPIO_Pin = GPIO_Pin_11;
+	gpio_init_.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+	gpio_init_.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_Init(GPIOC, &gpio_init_);
+
+
+}

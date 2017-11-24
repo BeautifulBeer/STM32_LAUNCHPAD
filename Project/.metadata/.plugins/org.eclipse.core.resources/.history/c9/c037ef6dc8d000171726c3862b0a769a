@@ -1,0 +1,16 @@
+/*
+ * config_bluetooth.c
+ *
+ *  Created on: 2017. 11. 24.
+ *      Author: hw_3
+ */
+
+#include "config_bluetooth.h"
+
+void m_Init_USART3(){
+
+}
+
+void m_Init_USART2(){
+
+}

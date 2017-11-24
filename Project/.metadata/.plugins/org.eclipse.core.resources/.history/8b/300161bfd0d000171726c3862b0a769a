@@ -1,0 +1,358 @@
+#include <misc.h>
+#include <stm32f10x.h>
+#include <stm32f10x_exti.h>
+#include <stm32f10x_gpio.h>
+#include <stm32f10x_rcc.h>
+#include <stm32f10x_usart.h>
+
+uint8_t USART1_str[100], USART2_str[100];
+int USART1_strSZ = 0, USART1_strPtr = 0;
+int USART2_strSZ = 0, USART2_strPtr = 0;
+
+void delay(int timer){
+   int i;
+   for(i = 0; i < timer ; ++i){}
+}
+
+
+void comfirmData(void){
+   GPIO_SetBits(GPIOD,GPIO_Pin_2);
+   delay(10000);
+   GPIO_ResetBits(GPIOD, GPIO_Pin_2);
+   GPIO_SetBits(GPIOD,GPIO_Pin_3);
+   delay(10000);
+   GPIO_ResetBits(GPIOD, GPIO_Pin_3);
+   GPIO_SetBits(GPIOD,GPIO_Pin_4);
+   delay(10000);
+   GPIO_ResetBits(GPIOD, GPIO_Pin_4);
+   GPIO_SetBits(GPIOD,GPIO_Pin_7);
+   delay(10000);
+   GPIO_ResetBits(GPIOD, GPIO_Pin_7);
+}
+
+
+void _USART1_InterruptConfigure(void) {
+   NVIC_InitTypeDef NVIC_init1;
+   EXTI_InitTypeDef EXTI_init1;
+
+   GPIO_EXTILineConfig(GPIO_PortSourceGPIOA, GPIO_PinSource10);   //Rx가 오면 interrupt 발생
+
+   EXTI_init1.EXTI_Line = EXTI_Line10;            // RX
+   EXTI_init1.EXTI_LineCmd = ENABLE;             // Enable Interrupt
+   EXTI_init1.EXTI_Mode = EXTI_Mode_Interrupt;      // Interrupt mode
+   EXTI_init1.EXTI_Trigger = EXTI_Trigger_Rising_Falling;
+   EXTI_Init(&EXTI_init1);
+
+   /* Enable the USART1 NVIC_init */
+   NVIC_init1.NVIC_IRQChannel = USART1_IRQn;
+   NVIC_init1.NVIC_IRQChannelPreemptionPriority = 0;
+   NVIC_init1.NVIC_IRQChannelSubPriority = 0;
+   NVIC_init1.NVIC_IRQChannelCmd = ENABLE;
+   NVIC_Init(&NVIC_init1);
+}
+
+void _USART2_InterruptConfigure(void) {
+   NVIC_InitTypeDef NVIC_init2;
+   EXTI_InitTypeDef EXTI_init2;
+
+   GPIO_EXTILineConfig(GPIO_PortSourceGPIOA, GPIO_PinSource3);
+
+   EXTI_init2.EXTI_Line = EXTI_Line3;            // RX
+   EXTI_init2.EXTI_LineCmd = ENABLE;             // Enable Interrupt
+   EXTI_init2.EXTI_Mode = EXTI_Mode_Interrupt;      // Interrupt mode
+   EXTI_init2.EXTI_Trigger = EXTI_Trigger_Rising_Falling;
+   EXTI_Init(&EXTI_init2);
+
+   /* Enable the USART1 NVIC_init */
+   NVIC_init2.NVIC_IRQChannel = USART2_IRQn;
+   NVIC_init2.NVIC_IRQChannelPreemptionPriority = 0;
+   NVIC_init2.NVIC_IRQChannelSubPriority = 0;
+   NVIC_init2.NVIC_IRQChannelCmd = ENABLE;
+   NVIC_Init(&NVIC_init2);
+}
+
+
+
+void _GPIO_LEDInit(void) {
+   GPIO_InitTypeDef GPIOD_LED_init;
+
+   GPIOD_LED_init.GPIO_Mode = GPIO_Mode_Out_PP;
+   GPIOD_LED_init.GPIO_Speed = GPIO_Speed_50MHz;
+
+   //GPIOD_LED_init.GPIO_Pin = 0x44444444;
+   GPIOD_LED_init.GPIO_Pin = (GPIO_Pin_2 | GPIO_Pin_3 | GPIO_Pin_4 | GPIO_Pin_7);
+
+   GPIO_Init(GPIOD, &GPIOD_LED_init);
+}
+
+void _GPIO_USART1Init(void){
+   GPIO_InitTypeDef GPIO_USART_init9;      //Tx
+   GPIO_InitTypeDef GPIO_USART_init10;      //Rx -> interrupt 조절
+
+   GPIO_USART_init9.GPIO_Mode = GPIO_Mode_AF_PP;
+   GPIO_USART_init9.GPIO_Pin = GPIO_Pin_9;
+   GPIO_USART_init9.GPIO_Speed = GPIO_Speed_50MHz;
+   GPIO_Init(GPIOA, &GPIO_USART_init9);
+
+   GPIO_USART_init10.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+   GPIO_USART_init10.GPIO_Pin = GPIO_Pin_10;
+   GPIO_USART_init10.GPIO_Speed = GPIO_Speed_50MHz;
+   GPIO_Init(GPIOA, &GPIO_USART_init10);
+}
+
+void _GPIO_USART2Init(void){
+   GPIO_InitTypeDef GPIO_USART_init2;      //Tx
+   GPIO_InitTypeDef GPIO_USART_init3;      //Rx -> interrupt 조절
+
+   GPIO_USART_init2.GPIO_Mode = GPIO_Mode_AF_PP;
+   GPIO_USART_init2.GPIO_Pin = GPIO_Pin_2;
+   GPIO_USART_init2.GPIO_Speed = GPIO_Speed_50MHz;
+   GPIO_Init(GPIOA, &GPIO_USART_init2);
+
+   GPIO_USART_init3.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+   GPIO_USART_init3.GPIO_Pin = GPIO_Pin_3;
+   GPIO_USART_init3.GPIO_Speed = GPIO_Speed_50MHz;
+   GPIO_Init(GPIOA, &GPIO_USART_init3);
+}
+
+void _Uart1_Configure(){
+   USART_InitTypeDef USART_init1;
+
+   USART_init1.USART_BaudRate = 9600;
+   USART_init1.USART_WordLength = USART_WordLength_8b;
+   USART_init1.USART_StopBits = USART_StopBits_1;
+   USART_init1.USART_Parity = USART_Parity_No;
+   USART_init1.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
+   USART_init1.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
+   USART_Init(USART1, &USART_init1);
+
+   /* Enable USART1 */
+   USART_Cmd(USART1, ENABLE);
+
+   /* Enable USART1 Receive and Transmit interrupts */
+   USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);
+   // USART_ITConfig(USART1, USART_IT_TXE, ENABLE);
+
+}
+
+void _Uart2_Configure(){
+   USART_InitTypeDef USART_init2;
+
+   USART_init2.USART_BaudRate = 9600;
+   USART_init2.USART_WordLength = USART_WordLength_8b;
+   USART_init2.USART_StopBits = USART_StopBits_1;
+   USART_init2.USART_Parity = USART_Parity_No;
+   USART_init2.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
+   USART_init2.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
+   USART_Init(USART2, &USART_init2);
+
+   /* Enable USART2 */
+   USART_Cmd(USART2, ENABLE);
+
+   /* Enable USART2 Receive and Transmit interrupts */
+   USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);
+   // USART_ITConfig(USART2, USART_IT_TXE, ENABLE);
+
+
+}
+
+
+
+
+
+void RCC_Configuration(void) {
+   /* Enable clock for GPIOB & AFIO */
+   RCC_APB2PeriphClockCmd(
+         RCC_APB2Periph_AFIO | RCC_APB2Periph_GPIOD | RCC_APB2Periph_GPIOA
+         | RCC_APB2Periph_USART1 , ENABLE);
+   RCC_APB1PeriphClockCmd(
+         RCC_APB1Periph_USART2 , ENABLE);
+}
+//RCC_APB2ENR_USART1EN
+void SysInit(void) {
+   RCC_DeInit();
+}
+void SetSysClock(void)
+{
+   volatile uint32_t StartUpCounter = 0, HSEStatus = 0;
+
+   /* SYSCLK, HCLK, PCLK2 and PCLK1 configuration ---------------------------*/
+   /* Enable HSE */
+   RCC->CR |= ((uint32_t)RCC_CR_HSEON);
+
+   /* Wait till HSE is ready and if Time out is reached exit */
+   do
+   {
+      HSEStatus = RCC->CR & RCC_CR_HSERDY;
+      StartUpCounter++;
+   } while((HSEStatus == 0) && (StartUpCounter != HSE_STARTUP_TIMEOUT));
+
+   if ((RCC->CR & RCC_CR_HSERDY) != RESET)
+   {
+      HSEStatus = (uint32_t)0x01;
+   }
+   else
+   {
+      HSEStatus = (uint32_t)0x00;
+   }
+
+   if (HSEStatus == (uint32_t)0x01)
+   {
+      /* Enable Prefetch Buffer */
+      FLASH->ACR |= FLASH_ACR_PRFTBE;
+
+      /* Flash 0 wait state */
+      FLASH->ACR &= (uint32_t)((uint32_t)~FLASH_ACR_LATENCY);
+      FLASH->ACR |= (uint32_t)FLASH_ACR_LATENCY_1;
+
+      /* HCLK = SYSCLK */
+      RCC->CFGR |= (uint32_t)RCC_CFGR_HPRE_DIV2;
+
+      /* PCLK2 = HCLK */
+      RCC->CFGR |= (uint32_t)RCC_CFGR_PPRE2_DIV2;
+
+      /* PCLK1 = HCLK */
+      RCC->CFGR |= (uint32_t)RCC_CFGR_PPRE1_DIV1;
+
+      RCC->CFGR &= (uint32_t)~(RCC_CFGR_PLLXTPRE | RCC_CFGR_PLLSRC | RCC_CFGR_PLLMULL);
+      RCC->CFGR |= (uint32_t)( RCC_CFGR_PLLSRC_PREDIV1 | RCC_CFGR_PLLMULL5);
+
+
+      RCC->CFGR2 &= (uint32_t)~(RCC_CFGR2_PREDIV2 | RCC_CFGR2_PLL2MUL |
+            RCC_CFGR2_PREDIV1 | RCC_CFGR2_PREDIV1SRC);
+      RCC->CFGR2 |= (uint32_t)(RCC_CFGR2_PREDIV2_DIV5 | RCC_CFGR2_PLL2MUL8 |
+            RCC_CFGR2_PREDIV1SRC_PLL2 | RCC_CFGR2_PREDIV1_DIV5);
+
+      /* Enable PLL2 */
+      RCC->CR |= RCC_CR_PLL2ON;
+      /* Wait till PLL2 is ready */
+      while((RCC->CR & RCC_CR_PLL2RDY) == 0)
+      {
+      }
+
+      /* Enable PLL */
+      RCC->CR |= RCC_CR_PLLON;
+
+      /* Wait till PLL is ready */
+      while((RCC->CR & RCC_CR_PLLRDY) == 0)
+      {
+      }
+
+      /* Select PLL as system clock source */
+      RCC->CFGR &= (uint32_t)((uint32_t)~(RCC_CFGR_SW));
+      RCC->CFGR |= (uint32_t)RCC_CFGR_SW_PLL;
+
+      /* Wait till PLL is used as system clock source */
+      while ((RCC->CFGR & (uint32_t)RCC_CFGR_SWS) != (uint32_t)0x08)
+      {
+      }
+   }
+   else
+   {
+   }
+
+}
+
+void GPIO_Configure(void) {
+   _GPIO_LEDInit();
+   _GPIO_USART1Init();
+   _GPIO_USART2Init();
+}
+
+
+void Uart_Configure(void) {
+   _Uart1_Configure();
+   _Uart2_Configure();
+
+}
+
+void Interrupt_Configure(void) {
+   _USART1_InterruptConfigure();
+   _USART2_InterruptConfigure();
+}
+
+
+void USART1_IRQHandler(void) {
+    //recv_data1;
+
+   if (USART_GetITStatus(USART1, USART_IT_RXNE) != RESET) {
+      char recv_data1 = USART_ReceiveData(USART1);
+      USART_SendData(USART1, recv_data1);
+      while(!(USART1->SR & USART_SR_TXE)){}
+      USART_SendData(USART2, recv_data1);
+      while(!(USART2->SR & USART_SR_TXE)){}
+//      if(recv_data1 != '\r'){
+//         USART_SendData(USART1, recv_data1);
+//         while(!(USART1->SR & USART_SR_TXE)){}
+//         USART1_str[USART1_strSZ++] = recv_data1;
+//         comfirmData();
+//         USART_SendData(USART2, recv_data1);
+//         while(!(USART2->SR & USART_SR_TXE)){}
+//      }
+//      else{
+//         for(USART1_strPtr = 0 ; USART1_strPtr < USART1_strSZ ; ++USART1_strPtr){
+//            USART_SendData(USART2, USART1_str[USART1_strPtr]);
+//            while(!(USART2->SR & USART_SR_TXE)){}
+//         }
+//      }
+      USART_ClearITPendingBit(USART1,USART_IT_RXNE);
+   }
+
+}
+
+void USART2_IRQHandler(void){
+    //recv_data2;
+
+   if (USART_GetITStatus(USART2, USART_IT_RXNE) != RESET) {
+      char recv_data2 = USART_ReceiveData(USART2);
+//      if(recv_data2<=10){
+//    	  GPIO_SetBits(GPIOD,GPIO_Pin_2);
+//      }
+//      else if(recv_data2<=20){
+//    	  GPIO_SetBits(GPIOD,GPIO_Pin_2);
+//    	  GPIO_SetBits(GPIOD,GPIO_Pin_3);
+//
+//      }else if(recv_data2<=30){
+//    	  GPIO_SetBits(GPIOD,GPIO_Pin_2);
+//    	  GPIO_SetBits(GPIOD,GPIO_Pin_3);
+//    	  GPIO_SetBits(GPIOD,GPIO_Pin_4);
+//
+//      }else{
+//    	  GPIO_SetBits(GPIOD,GPIO_Pin_2);
+//    	  GPIO_SetBits(GPIOD,GPIO_Pin_3);
+//    	  GPIO_SetBits(GPIOD,GPIO_Pin_4);
+//    	  GPIO_SetBits(GPIOD,GPIO_Pin_7);
+//      }
+      USART_SendData(USART1, recv_data2);
+      while(!(USART1->SR & USART_SR_TXE)){}
+//      if(recv_data2 != '\r'){
+//         USART2_str[USART2_strSZ++] = recv_data2;
+//         USART_SendData(USART1, recv_data2);
+//         while(!(USART1->SR & USART_SR_TXE)){}
+//
+//      }
+//      else{
+//         comfirmData();
+//         for(USART2_strPtr = 0 ; USART2_strPtr < USART2_strSZ ; ++USART2_strPtr){
+//            USART_SendData(USART1, USART2_str[USART2_strPtr]);
+//            while(!(USART1->SR & USART_SR_TXE)){}
+//         }
+//      }
+      USART_ClearITPendingBit(USART2,USART_IT_RXNE);
+   }
+}
+
+int main(void) {
+   SysInit();
+   SetSysClock();
+   RCC_Configuration();
+   GPIO_Configure();
+   Uart_Configure();
+   Interrupt_Configure();
+
+   while (1){}
+   return 0;
+
+
+
+}

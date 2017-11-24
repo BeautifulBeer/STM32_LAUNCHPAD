@@ -1,0 +1,18 @@
+/*
+ * system_config.h
+ *
+ *  Created on: 2017. 11. 24.
+ *      Author: hw_3
+ */
+
+#ifndef SYSTEM_CONFIG_H_
+#define SYSTEM_CONFIG_H_
+
+#include <misc.h>
+#include <stm32f10x.h>
+#include <stm32f10x_rcc.h>
+
+
+void m_Init_Usart2_Clock();
+
+#endif /* SYSTEM_CONFIG_H_ */
