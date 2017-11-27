@@ -9,10 +9,6 @@ import android.support.v7.widget.AppCompatImageView;
 import android.util.Log;
 import android.widget.TextView;
 
-import app.akexorcist.bluetotohspp.library.BluetoothSPP;
-import app.akexorcist.bluetotohspp.library.BluetoothState;
-import app.akexorcist.bluetotohspp.library.DeviceList;
-
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
     private AppCompatImageView imageView;
@@ -23,9 +19,6 @@ public class MainActivity extends AppCompatActivity {
         for(int i=0; i <50000000; i++){
 
         }
-        Intent intent = new Intent(this, BluetoothActivity.class);
-        startActivity(intent);
-        finish();
     }
 
     @Override

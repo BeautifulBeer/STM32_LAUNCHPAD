@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">BluetoothApp</string>
+    <string name="device_name">DeviceName</string>
+    <string name="device_addr">DeviceAddr</string>
 </resources>
