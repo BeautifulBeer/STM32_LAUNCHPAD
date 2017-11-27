@@ -1,0 +1,13 @@
+/*
+ * main.c
+ *
+ *  Created on: 2017. 11. 24.
+ *      Author: hw_3
+ */
+#include "bluetooth/config_bluetooth.c"
+#include "init/config_system.c"
+#include "init/config_nvic.c"
+
+int main(){
+	return 0;
+}
