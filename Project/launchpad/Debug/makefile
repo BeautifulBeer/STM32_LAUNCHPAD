@@ -26,10 +26,10 @@ RM := clean
 all: launchpad.axf
 
 # Tool invocations
-launchpad.axf: $(OBJS) C:\Users\hw_5\Desktop\git_repository\Project\launchpad\stm32-test.sct $(USER_OBJS) $(LIBS)
+launchpad.axf: $(OBJS) C:\Users\hw_3\Desktop\git_repository\Project\launchpad\stm32-test.sct $(USER_OBJS) $(LIBS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: ARM Linker 5'
-	armlink --entry=main --cpu=cortex-m3 --scatter="C:\Users\hw_5\Desktop\git_repository\Project\launchpad\stm32-test.sct" --info=sizes -o "launchpad.axf" $(OBJS) $(USER_OBJS) $(LIBS)
+	armlink --entry=main --cpu=cortex-m3 --scatter="C:\Users\hw_3\Desktop\git_repository\Project\launchpad\stm32-test.sct" --info=sizes -o "launchpad.axf" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 

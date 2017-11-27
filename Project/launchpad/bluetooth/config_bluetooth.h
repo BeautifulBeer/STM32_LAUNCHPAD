@@ -15,8 +15,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-const int MAX_LENGTH = 512;
-char buffer_[MAX_LENGTH + 1];
+#define MAX_LENGTH	512
 
 /*
  *
@@ -47,10 +46,10 @@ void USART2_IRQHandler(void);
 //Interrupt Handler for USART3
 void USART3_IRQHandler(void);
 //USART send string data until encounter \n (Maximum length is 512bytes)
-void m_USART_StringSend(USART_TypeDef* USARTx, char* str);
+void m_USART_StringSend(USART_TypeDef* USARTx, char* str, char buffer_[MAX_LENGTH] );
 //USART send 2bytes including Synchronization
 void m_USART_DataSend(USART_TypeDef* USARTx, uint16_t Data);
 //Buffer Initialization
-void m_buffer_init(void);
+void m_buffer_init(char* buffer_);
 
 #endif /* CONFIG_BLUETOOTH_H_ */
