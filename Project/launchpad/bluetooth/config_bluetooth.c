@@ -7,13 +7,15 @@
 
 #include "config_bluetooth.h"
 
-void m_Init_BT_USART3(){
+void m_Init_BT_USART3(void){
+	USART_DeInit(USART3);
 	m_Init_BT_USART(USART3);
 	USART_Cmd(USART3, ENABLE);
 	USART_ITConfig(USART3, USART_IT_RXNE, ENABLE);
 }
 
-void m_Init_BT_USART2(){
+void m_Init_BT_USART2(void){
+	USART_DeInit(USART2);
 	m_Init_BT_USART(USART2);
 	USART_Cmd(USART2, ENABLE);
 	USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);
@@ -31,7 +33,7 @@ void m_Init_BT_USART(USART_TypeDef* USARTx){
 	USART_Init(USARTx, &usart_init_);
 }
 
-void m_Init_BT_USART3_GPIOC(){
+void m_Init_BT_USART3_GPIOC(void){
 	GPIO_InitTypeDef gpio_init_;
 	//Tx configuration
 	gpio_init_.GPIO_Pin = GPIO_Pin_10;
@@ -45,7 +47,7 @@ void m_Init_BT_USART3_GPIOC(){
 	GPIO_Init(GPIOC, &gpio_init_);
 }
 
-void m_Init_BT_USART2_GPIOA(){
+void m_Init_BT_USART2_GPIOA(void){
 	GPIO_InitTypeDef gpio_init_;
 	//Tx configuration
 	gpio_init_.GPIO_Pin = GPIO_Pin_2;
@@ -60,7 +62,7 @@ void m_Init_BT_USART2_GPIOA(){
 }
 
 
-void m_Init_BT_USART2_EXIT(){
+void m_Init_BT_USART2_EXIT(void){
 	EXTI_InitTypeDef exti_init_;
 	//EXTI line configuration
 	GPIO_EXTILineConfig(GPIO_PortSourceGPIOA, GPIO_PinSource3);
@@ -72,7 +74,7 @@ void m_Init_BT_USART2_EXIT(){
 	EXTI_Init(&exti_init_);
 }
 
-void m_Init_BT_USART3_EXIT(){
+void m_Init_BT_USART3_EXIT(void){
 	EXTI_InitTypeDef exti_init_;
 	//EXTI line configuration
 	GPIO_EXTILineConfig(GPIO_PortSourceGPIOC, GPIO_PinSource11);
@@ -84,16 +86,46 @@ void m_Init_BT_USART3_EXIT(){
 	EXTI_Init(&exti_init_);
 }
 
+void m_USART_StringSend(USART_TypeDef* USARTx, const char* str){
+	if(str != NULL && strlen(str) <= MAX_LENGTH ){
+		m_buffer_init();
+		memcpy(buffer_, str, strlen(str) + 1);
+		for(int i=0; i<MAX_LENGTH; i++){
+			if(buffer_[i] != NULL){
+				m_USART_DataSend(USARTx, buffer_[i]);
+			}else{
+				break;
+			}
+		}
+	}else{
+		//Violate function condition
+		return;
+	}
+}
+
+void m_USART_DataSend(USART_TypeDef* USARTx, uint16_t Data){
+	USART_DataSend(USARTx, Data);
+	while(USART_GetITStatus(USARTx, USART_IT_TXE) == SET);
+}
+
 void USART2_IRQHandler(void){
-	if (USART_GetITStatus(USART2, USART_IT_RXNE) != RESET) {
-		//Implementation
+	if (USART_GetITStatus(USART2, USART_IT_RXNE) == SET) {
+		uint16_t data = USART_ReceiveData(USART2);
+		//
 	}
 	USART_ClearITPendingBit(USART2, USART_IT_RXNE);
 }
 
 void USART3_IRQHandler(void){
-	if (USART_GetITStatus(USART3, USART_IT_RXNE) != RESET) {
-		//Implementation
+	if (USART_GetITStatus(USART3, USART_IT_RXNE) == SET) {
+		uint16_t data = USART_ReceiveData(USART3);
 	}
 	USART_ClearITPendingBit(USART3, USART_IT_RXNE);
+}
+
+void m_buffer_init(void){
+	if(buffer_ == NULL){
+	buffer_ = (char*)malloc(sizeof(char) * MAX_LENGTH);
+	}
+	memset(buffer_, 0, MAX_LENGTH);
 }

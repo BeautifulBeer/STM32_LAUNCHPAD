@@ -7,7 +7,7 @@
 
 #include "config_nvic.h"
 
-void m_Init_USART2_NVIC(){
+void m_Init_USART2_NVIC(void){
 	NVIC_InitTypeDef nvic_init_;
 	nvic_init_.NVIC_IRQChannel = USART2_IRQn;
 	nvic_init_.NVIC_IRQChannelPreemptionPriority = 0;
@@ -16,7 +16,7 @@ void m_Init_USART2_NVIC(){
 	NVIC_Init(&nvic_init_);
 }
 
-void m_Init_USART3_NVIC(){
+void m_Init_USART3_NVIC(void){
 	NVIC_InitTypeDef nvic_init_;
 	nvic_init_.NVIC_IRQChannel = USART3_IRQn;
 	nvic_init_.NVIC_IRQChannelPreemptionPriority = 0;
