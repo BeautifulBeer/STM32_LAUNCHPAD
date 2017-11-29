@@ -7,6 +7,7 @@
 
 #include "config_bluetooth.h"
 
+
 void m_Init_BT_USART3(void){
 	USART_DeInit(USART3);
 	m_Init_BT_USART(USART3);
@@ -86,11 +87,12 @@ void m_Init_BT_USART3_EXIT(void){
 	EXTI_Init(&exti_init_);
 }
 
-void m_USART_StringSend(USART_TypeDef* USARTx, const char* str){
+void m_USART_StringSend(USART_TypeDef* USARTx, char* str, char buffer_[MAX_LENGTH]){
+	int i;
 	if(str != NULL && strlen(str) <= MAX_LENGTH ){
-		m_buffer_init();
+		m_buffer_init(buffer_);
 		memcpy(buffer_, str, strlen(str) + 1);
-		for(int i=0; i<MAX_LENGTH; i++){
+		for(i=0; i<MAX_LENGTH; i++){
 			if(buffer_[i] != NULL){
 				m_USART_DataSend(USARTx, buffer_[i]);
 			}else{
@@ -104,7 +106,7 @@ void m_USART_StringSend(USART_TypeDef* USARTx, const char* str){
 }
 
 void m_USART_DataSend(USART_TypeDef* USARTx, uint16_t Data){
-	USART_DataSend(USARTx, Data);
+	USART_SendData(USARTx, Data);
 	while(USART_GetITStatus(USARTx, USART_IT_TXE) == SET);
 }
 
@@ -123,9 +125,9 @@ void USART3_IRQHandler(void){
 	USART_ClearITPendingBit(USART3, USART_IT_RXNE);
 }
 
-void m_buffer_init(void){
+void m_buffer_init(char* buffer_){
 	if(buffer_ == NULL){
-	buffer_ = (char*)malloc(sizeof(char) * MAX_LENGTH);
+		buffer_ = (char*)malloc(sizeof(char) * MAX_LENGTH);
 	}
 	memset(buffer_, 0, MAX_LENGTH);
 }

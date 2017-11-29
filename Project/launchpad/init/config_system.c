@@ -43,7 +43,7 @@ void m_System_Clock(void){
 	    RCC_PCLK1Config(RCC_HCLK_Div1);
 	    /* Enable PLL */
 	    RCC_PLLCmd(ENABLE);
-	    RCC_PLLConfig(RCC_CFGR_PLLSRC_PREDIV1 | RCC_CFGR_PLLMULL5);
+	    RCC_PLLConfig(RCC_CFGR_PLLSRC_PREDIV1, RCC_CFGR_PLLMULL5);
 	    /* Enable PLL2 */
 	    RCC_PLL2Cmd(ENABLE);
 	    RCC_PLL2Config(RCC_CFGR2_PREDIV2_DIV5 | RCC_CFGR2_PLL2MUL8 |
