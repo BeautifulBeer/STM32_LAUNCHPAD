@@ -9,6 +9,8 @@ import android.support.v7.widget.AppCompatImageView;
 import android.util.Log;
 import android.widget.TextView;
 
+import com.ykw.bluetoothapp.bluetooth.BluetoothActivity;
+
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
     private AppCompatImageView imageView;
@@ -16,26 +18,20 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        for(int i=0; i <50000000; i++){
-
-        }
+        Intent intent = new Intent(MainActivity.this, BluetoothActivity.class);
+        startActivity(intent);
+        finish();
     }
-
     @Override
     protected void onStart() {
         super.onStart();
 
     }
-
-
-
-
     /**
      * A native method that is implemented by the 'native-lib' native library,
      * which is packaged with this application.
      */
     public native String stringFromJNI();
-
     // Used to load the 'native-lib' library on application startup.
     static {
         System.loadLibrary("native-lib");
