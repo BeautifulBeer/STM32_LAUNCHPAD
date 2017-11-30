@@ -22,6 +22,6 @@
 //Initialize nested vectored interrupt controller configuration for USART2, bluetooth
 void m_Init_USART2_NVIC(void);
 //Initialize nested vectored interrupt controller configuration for USART3, bluetooth
-void m_Init_USART3_NVIC(void);
+void m_Init_USART1_NVIC(void);
 
 #endif /* CONFIG_INTERRUPT_H_ */

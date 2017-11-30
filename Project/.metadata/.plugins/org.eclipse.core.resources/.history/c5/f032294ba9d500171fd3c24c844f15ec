@@ -1,0 +1,55 @@
+/*
+ * config_bluetooth.h
+ *
+ *  Created on: 2017. 11. 24.
+ *      Author: hw_3
+ */
+
+#ifndef CONFIG_BLUETOOTH_H_
+#define CONFIG_BLUETOOTH_H_
+
+#include <stm32f10x.h>
+#include <stm32f10x_exti.h>
+#include <stm32f10x_gpio.h>
+#include <stm32f10x_usart.h>
+#include <string.h>
+#include <stdlib.h>
+
+#define BT_STR_MAX_LENGTH	512
+
+/*
+ *
+ * This code implements bluetooth data transmission with android
+ *
+ * USART1(PA09 - TX, PA10 - RX), USART2(PA2 - TX, PA3 - RX) is used
+ *
+ */
+
+//Initialize bluetooth configuration for transmission
+void m_Init_Bluetooth(void);
+//Initialize all configuration for usart1 transmission including clock enable
+void m_Init_BT_USART1(void);
+//Initialize all configuration for usart2 transmission including clock enable
+void m_Init_BT_USART2(void);
+//Initialize GPIOC configuration for USART3
+void m_Init_BT_USART1_GPIOA(void);
+//Initialize GPIOA configuration for USART2
+void m_Init_BT_USART2_GPIOA(void);
+//Initialize External Interrupt configuration for bluetooth
+void m_Init_BT_USART2_EXIT(void);
+//Initialize External Interrupt configuration for bluetooth
+void m_Init_BT_USART1_EXIT(void);
+//Initialize USART configuration for bluetooth
+void m_Init_BT_USART(USART_TypeDef* USARTx);
+//Interrupt Handler for USART2
+void USART2_IRQHandler(void);
+//Interrupt Handler for USART3
+void USART1_IRQHandler(void);
+//USART send string data until encounter \n (Maximum length is 512bytes)
+void m_USART_StringSend(USART_TypeDef* USARTx, char* str, char buffer_[BT_STR_MAX_LENGTH] );
+//USART send 2bytes including Synchronization
+void m_USART_DataSend(USART_TypeDef* USARTx, uint16_t Data);
+//Buffer Initialization
+void m_buffer_init(char* buffer_);
+
+#endif /* CONFIG_BLUETOOTH_H_ */

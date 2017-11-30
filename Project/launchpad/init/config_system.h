@@ -19,8 +19,8 @@ void m_Init_GPIOA_Clock(void);
 void m_Init_GPIOC_Clock(void);
 //Enable USART2
 void m_Init_USART2_Clock(void);
-//Enable USART3
-void m_Init_USART3_Clock(void);
+//Enable USART1
+void m_Init_USART1_Clock(void);
 //Setting System clock to predefined
 void m_System_Clock(void);
 

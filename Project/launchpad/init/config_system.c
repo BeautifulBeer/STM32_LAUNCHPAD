@@ -19,8 +19,8 @@ void m_Init_USART2_Clock(void){
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2,ENABLE);
 }
 
-void m_Init_USART3_Clock(void){
-	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART3,ENABLE);
+void m_Init_USART1_Clock(void){
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1,ENABLE);
 }
 
 void m_System_Clock(void){
