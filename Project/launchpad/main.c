@@ -4,6 +4,15 @@
  *  Created on: 2017. 11. 24.
  *      Author: hw_3
  */
+
+/*
+ * flash setting
+ *
+flash load "./launchpad/flashclear.axf"
+
+flash load "./launchpad/Debug/launchpad.axf"
+ */
+
 #include "bluetooth/config_bluetooth.h"
 #include "init/config_system.h"
 #include "init/config_nvic.h"
@@ -61,6 +70,8 @@ int main(){
 	//Initialize USART1/2 GPIOA
 	m_Init_BT_USART1_GPIOA();
 	m_Init_BT_USART2_GPIOA();
+	//MCO Port Init
+	m_Init_MCO_GPIOA();
 
 	//Initialize USART1/2
 	m_Init_BT_USART1();
@@ -71,6 +82,7 @@ int main(){
 	m_Init_USART1_NVIC();
 	m_USART_DataSend(USART2, "AT+BTSCAN", buffer_);
 
+	m_MCO_Enable();
 	Configure_LED();
 
 

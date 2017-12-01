@@ -1,5 +1,10 @@
-21:48:26 **** Incremental Build of configuration Debug for project launchpad ****
+05:01:10 **** Incremental Build of configuration Debug for project launchpad ****
 make all 
+'Building file: ../init/config_system.c'
+'Invoking: ARM C Compiler 5'
+armcc -I"C:\Users\hw_3\Desktop\git_repository\Project\launchpad\Libraries" -I"C:\Users\hw_3\Desktop\git_repository\Project\launchpad\Libraries\CMSIS\CoreSupport" -I"C:\Users\hw_3\Desktop\git_repository\Project\launchpad\Libraries\CMSIS\DeviceSupport" -I"C:\Users\hw_3\Desktop\git_repository\Project\launchpad\Libraries\CMSIS\DeviceSupport\Startup" -I"C:\Users\hw_3\Desktop\git_repository\Project\launchpad\Libraries\STM32F10x_StdPeriph_Driver_v3.5\inc" -I"C:\Users\hw_3\Desktop\git_repository\Project\launchpad\Libraries\STM32F10x_StdPeriph_Driver_v3.5\src" -O0 --cpu=cortex-m3 -g -c -o "init/config_system.o" "../init/config_system.c"
+'Finished building: ../init/config_system.c'
+' '
 'Building file: ../main.c'
 'Invoking: ARM C Compiler 5'
 armcc -I"C:\Users\hw_3\Desktop\git_repository\Project\launchpad\Libraries" -I"C:\Users\hw_3\Desktop\git_repository\Project\launchpad\Libraries\CMSIS\CoreSupport" -I"C:\Users\hw_3\Desktop\git_repository\Project\launchpad\Libraries\CMSIS\DeviceSupport" -I"C:\Users\hw_3\Desktop\git_repository\Project\launchpad\Libraries\CMSIS\DeviceSupport\Startup" -I"C:\Users\hw_3\Desktop\git_repository\Project\launchpad\Libraries\STM32F10x_StdPeriph_Driver_v3.5\inc" -I"C:\Users\hw_3\Desktop\git_repository\Project\launchpad\Libraries\STM32F10x_StdPeriph_Driver_v3.5\src" -O0 --cpu=cortex-m3 -g -c -o "main.o" "../main.c"
@@ -16,10 +21,10 @@ Image component sizes
 
       Code (inc. data)   RO Data    RW Data    ZI Data      Debug   Object Name
 
-       568         14          0          0          0      19798   config_bluetooth.o
+       568         14          0          0          0      11262   config_bluetooth.o
         64          0          0          0          0     226476   config_nvic.o
-       176          4          0          0          0      21067   config_system.o
-       240         24          0          0          0       9737   main.o
+       240          6          0          0          0      29881   config_system.o
+       248         24          0          0          0       9745   main.o
        220         22          0          0          0       3745   misc.o
         64         26        336          0       1536        896   startup_stm32f10x_cl.o
        284         10          0          0          0       2411   stm32f10x_exti.o
@@ -30,7 +35,7 @@ Image component sizes
        644         48          0         20          0       2095   system_stm32f10x.o
 
     ----------------------------------------------------------------------
-      6848        304        368         40       1536     320134   Object Totals
+      6920        306        368         40       1536     320420   Object Totals
          0          0         32          0          0          0   (incl. Generated)
          0          0          0          0          0          0   (incl. Padding)
 
@@ -97,20 +102,20 @@ Image component sizes
 
       Code (inc. data)   RO Data    RW Data    ZI Data      Debug   
 
-      8128        382        368         40       1632     320018   Grand Totals
-      8128        382        368         40       1632     320018   ELF Image Totals
-      8128        382        368         40          0          0   ROM Totals
+      8200        384        368         40       1632     320304   Grand Totals
+      8200        384        368         40       1632     320304   ELF Image Totals
+      8200        384        368         40          0          0   ROM Totals
 
 ==============================================================================
 
-    Total RO  Size (Code + RO Data)                 8496 (   8.30kB)
+    Total RO  Size (Code + RO Data)                 8568 (   8.37kB)
     Total RW  Size (RW Data + ZI Data)              1672 (   1.63kB)
-    Total ROM Size (Code + RO Data + RW Data)       8536 (   8.34kB)
+    Total ROM Size (Code + RO Data + RW Data)       8608 (   8.41kB)
 
 ==============================================================================
 
 'Finished building target: launchpad.axf'
 ' '
 
-21:48:26 Build Finished (took 476ms)
+05:01:10 Build Finished (took 580ms)
 
