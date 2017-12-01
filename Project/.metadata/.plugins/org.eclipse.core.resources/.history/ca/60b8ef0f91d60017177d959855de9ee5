@@ -29,19 +29,6 @@ void USART1_IRQHandler(void){
 }
 
 
-void Configure_LED() {
-   GPIO_InitTypeDef GPIO_init;
-
-   RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOD, ENABLE);
-
-   GPIO_init.GPIO_Mode = GPIO_Mode_Out_PP;
-   GPIO_init.GPIO_Pin = (GPIO_Pin_2 | GPIO_Pin_3 | GPIO_Pin_4 | GPIO_Pin_7);
-   GPIO_init.GPIO_Speed = GPIO_Speed_50MHz;
-
-   GPIO_Init(GPIOD, &GPIO_init);
-}
-
-
 int main(){
 	char buffer_[BT_STR_MAX_LENGTH];
 	//System Configuration Initialization
@@ -70,16 +57,6 @@ int main(){
 	m_Init_USART2_NVIC();
 	m_Init_USART1_NVIC();
 	m_USART_DataSend(USART2, "AT+BTSCAN", buffer_);
-
-	Configure_LED();
-
-
-	GPIOD->BSRR = GPIO_BSRR_BS2;
-	GPIOD->BSRR = GPIO_BSRR_BS3;
-	GPIOD->BSRR = GPIO_BSRR_BS4;
-	GPIOD->BSRR = GPIO_BSRR_BS7;
-
-
 	//Main Loop
 	while(1){
 
