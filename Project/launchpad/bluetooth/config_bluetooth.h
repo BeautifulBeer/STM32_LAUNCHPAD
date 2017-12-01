@@ -15,7 +15,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#define BT_STR_MAX_LENGTH	512
+#define BT_STR_MAX_LENGTH  512
 
 /*
  *
@@ -23,7 +23,28 @@
  *
  * USART1(PA09 - TX, PA10 - RX), USART2(PA2 - TX, PA3 - RX) is used
  *
+ * ATCommand List
+ *
+ * AT+BTSCAN
+ *
  */
+
+/*
+ * Data transmission Protocol
+ *
+ * BD + BD + CR + LF + Data length
+ * 	SD
+ * 		{DATA} - String, Max length : 512
+ * 	ED
+ * LF + CR + BD + BD
+ */
+
+#define CR 0x0D //Carriage return
+#define LF 0x0A //Line feed
+#define BD 0xFF //Boundary
+#define SD 0xDF //Data Start
+#define ED 0xCF //Data End
+
 
 //Initialize bluetooth configuration for transmission
 void m_Init_Bluetooth(void);
@@ -41,15 +62,12 @@ void m_Init_BT_USART2_EXIT(void);
 void m_Init_BT_USART1_EXIT(void);
 //Initialize USART configuration for bluetooth
 void m_Init_BT_USART(USART_TypeDef* USARTx);
-//Interrupt Handler for USART2
-void USART2_IRQHandler(void);
-//Interrupt Handler for USART1
-void USART1_IRQHandler(void);
 //USART send string data until encounter \n (Maximum length is 512bytes)
-void m_USART_StringSend(USART_TypeDef* USARTx, char* str, char buffer_[BT_STR_MAX_LENGTH] );
+void m_USART_DataSend(USART_TypeDef* USARTx, char* str, char buffer_[BT_STR_MAX_LENGTH] );
 //USART send 2bytes including Synchronization
-void m_USART_DataSend(USART_TypeDef* USARTx, uint16_t Data);
+void m_USART_byteSend(USART_TypeDef* USARTx, uint16_t Data);
 //Buffer Initialization
 void m_buffer_init(char* buffer_);
+
 
 #endif /* CONFIG_BLUETOOTH_H_ */

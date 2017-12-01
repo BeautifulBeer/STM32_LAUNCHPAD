@@ -40,11 +40,10 @@ void m_Init_BT_USART1_GPIOA(void){
 	gpio_init_.GPIO_Pin = GPIO_Pin_9;
 	gpio_init_.GPIO_Mode = GPIO_Mode_AF_PP;
 	gpio_init_.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_Init(GPIOC, &gpio_init_);
+	GPIO_Init(GPIOA, &gpio_init_);
 	//Rx configuration
 	gpio_init_.GPIO_Pin = GPIO_Pin_10;
 	gpio_init_.GPIO_Mode = GPIO_Mode_IN_FLOATING;
-	gpio_init_.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_Init(GPIOA, &gpio_init_);
 }
 
@@ -58,7 +57,6 @@ void m_Init_BT_USART2_GPIOA(void){
 	//Rx configuration
 	gpio_init_.GPIO_Pin = GPIO_Pin_3;
 	gpio_init_.GPIO_Mode = GPIO_Mode_IN_FLOATING;
-	gpio_init_.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_Init(GPIOA, &gpio_init_);
 }
 
@@ -87,43 +85,40 @@ void m_Init_BT_USART1_EXIT(void){
 	EXTI_Init(&exti_init_);
 }
 
-void m_USART_StringSend(USART_TypeDef* USARTx, char* str, char buffer_[BT_STR_MAX_LENGTH]){
+void m_USART_DataSend(USART_TypeDef* USARTx, char* str, char buffer_[BT_STR_MAX_LENGTH]){
 	int i;
+	uint16_t length = 0;
 	if(str != NULL && strlen(str) <= BT_STR_MAX_LENGTH ){
+		length = (uint16_t)strlen(str);
 		m_buffer_init(buffer_);
 		memcpy(buffer_, str, strlen(str) + 1);
+		m_USART_byteSend(USARTx, BD);
+		m_USART_byteSend(USARTx, BD);
+		m_USART_byteSend(USARTx, CR);
+		m_USART_byteSend(USARTx, LF);
+		m_USART_byteSend(USARTx, length);
+		m_USART_byteSend(USARTx, SD);
 		for(i=0; i<BT_STR_MAX_LENGTH; i++){
 			if(buffer_[i] != NULL){
-				m_USART_DataSend(USARTx, buffer_[i]);
+				m_USART_byteSend(USARTx, buffer_[i]);
 			}else{
 				break;
 			}
 		}
+		m_USART_byteSend(USARTx, ED);
+		m_USART_byteSend(USARTx, LF);
+		m_USART_byteSend(USARTx, CR);
+		m_USART_byteSend(USARTx, BD);
+		m_USART_byteSend(USARTx, BD);
 	}else{
 		//Violate function condition
 		return;
 	}
 }
 
-void m_USART_DataSend(USART_TypeDef* USARTx, uint16_t Data){
+void m_USART_byteSend(USART_TypeDef* USARTx, uint16_t Data){
 	USART_SendData(USARTx, Data);
-	while(USART_GetITStatus(USARTx, USART_IT_TXE) == SET);
-}
-
-void USART2_IRQHandler(void){
-	if (USART_GetITStatus(USART2, USART_IT_RXNE) == SET) {
-		uint16_t data = USART_ReceiveData(USART2);
-		m_USART_DataSend(USART1, data);
-	}
-	USART_ClearITPendingBit(USART2, USART_IT_RXNE);
-}
-
-void USART1_IRQHandler(void){
-	if (USART_GetITStatus(USART1, USART_IT_RXNE) == SET) {
-		uint16_t data = USART_ReceiveData(USART3);
-		m_USART_DataSend(USART2, data);
-	}
-	USART_ClearITPendingBit(USART1, USART_IT_RXNE);
+	while(USART_GetFlagStatus(USARTx, USART_FLAG_TXE) == RESET);
 }
 
 void m_buffer_init(char* buffer_){

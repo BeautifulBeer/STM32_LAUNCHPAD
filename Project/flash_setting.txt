@@ -1,0 +1,3 @@
+flash load "./launchpad/flashclear.axf"
+
+flash load "./launchpad/Debug/launchpad.axf"
