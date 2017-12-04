@@ -1,0 +1,13 @@
+/*
+ * config_exti.h
+ *
+ *  Created on: 2017. 12. 4.
+ *      Author: hw_3
+ */
+
+#ifndef CONFIG_EXTI_H_
+#define CONFIG_EXTI_H_
+
+
+
+#endif /* CONFIG_EXTI_H_ */

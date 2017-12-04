@@ -1,0 +1,20 @@
+/*
+ * config_pwm.c
+ *
+ *  Created on: 2017. 12. 5.
+ *      Author: hw_3
+ */
+
+#include "config_pwm.h"
+
+void m_Init_TIM(TIM_TypeDef* TIMx){
+	TIM_TimeBaseInitTypeDef time_;
+	time_.TIM_Prescaler = 20;
+	time_.TIM_ClockDivision = TIM_;
+	TIM_TimeBaseInit(TIMx, &time_);
+}
+
+void m_Init_PWM(TIM_TypeDef* TIMx){
+	TIM_OCInitTypeDef tim_oc_;
+
+}

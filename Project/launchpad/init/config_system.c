@@ -11,6 +11,10 @@ void m_Init_GPIOA_Clock(void){
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA,ENABLE);
 }
 
+void m_Init_GPIOB_Clock(void){
+	RCC_APB1PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
+}
+
 void m_Init_GPIOC_Clock(void){
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC,ENABLE);
 }
@@ -21,6 +25,10 @@ void m_Init_USART2_Clock(void){
 
 void m_Init_USART1_Clock(void){
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1,ENABLE);
+}
+
+void m_Init_I2C_Clock(void){
+	RCC_APB2PeriphClockCmd(RCC_APB1Periph_I2C1, ENABLE);
 }
 
 void m_System_Clock(void){
@@ -41,22 +49,22 @@ void m_System_Clock(void){
 	    RCC_PCLK2Config(RCC_HCLK_Div1);
 	    /* PCLK1 = HCLK / 2 */
 	    RCC_PCLK1Config(RCC_HCLK_Div2);
-	    /* Enable PLL */
-	    RCC_PLLCmd(ENABLE);
 	    /* Enable PLL2 */
 	   	RCC_PLL2Cmd(ENABLE);
-	   	RCC_PREDIV2Config(RCC_PREDIV2_Div2);
-	   	RCC_PLL2Config(RCC_PLL2Mul_10);
-	    //Select PREVIV1 MUX Source as PLL2 and div4
-	    RCC_PREDIV1Config(RCC_PREDIV1_Source_PLL2, RCC_PREDIV1_Div4);
-	    //Select PLL MUX Source as PLLCLK and mul5
-	    RCC_PLLConfig(RCC_PLLSource_PREDIV1, RCC_PLLMul_5);
-	    /* Select PLL as system clock source */
-	    RCC_SYSCLKConfig(RCC_SYSCLKSource_PLLCLK);
-	    /* Wait till PLL2 is ready */
-	    while(RCC_GetFlagStatus(RCC_FLAG_PLL2RDY) != SET);
+	   	RCC_PREDIV2Config(RCC_PREDIV2_Div5);
+	   	RCC_PLL2Config(RCC_PLL2Mul_8);
+	   	/* Wait till PLL2 is ready */
+	   	while(RCC_GetFlagStatus(RCC_FLAG_PLL2RDY) != SET);
+	   	//Select PREVIV1 MUX Source as PLL2 and div4
+	    RCC_PREDIV1Config(RCC_PREDIV1_Source_PLL2, RCC_PREDIV1_Div5);
+	    /* Enable PLL */
+	    RCC_PLLCmd(ENABLE);
 	    /* Wait till PLL is ready */
 	    while(RCC_GetFlagStatus(RCC_FLAG_PLLRDY) != SET);
+	    //Select PLL MUX Source as PLLCLK and mul5
+	    RCC_PLLConfig(RCC_PLLSource_PREDIV1, RCC_PLLMul_9);
+	    /* Select PLL as system clock source */
+	    RCC_SYSCLKConfig(RCC_SYSCLKSource_PLLCLK);
 	    /* Wait till PLL is used as system clock source */
 	    while (RCC_GetSYSCLKSource() != RCC_CFGR_SWS_PLL);
 	}
@@ -69,6 +77,14 @@ void m_Init_MCO_GPIOA(void){
 	GPIO_Init(GPIOA, &gpio_);
 }
 
+void m_Init_AFIO_Clock(void){
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
+}
+
 void m_MCO_Enable(void){
 	RCC_MCOConfig(RCC_MCO_SYSCLK);
+}
+
+void m_Init_TIM2_Clock(void){
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
 }

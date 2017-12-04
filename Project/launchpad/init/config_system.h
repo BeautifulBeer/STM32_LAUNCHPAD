@@ -12,7 +12,13 @@
 #include <stm32f10x_rcc.h>
 #include <stm32f10x_flash.h>
 #include <stm32f10x_gpio.h>
+#include <system_stm32f10x.h>
 
+
+//Enable Timer 2
+void m_Init_TIM2_Clock(void);
+//Enable AFIO
+void m_Init_AFIO_Clock(void);
 //Enable GPIOA
 void m_Init_GPIOA_Clock(void);
 //Enable GPIOC
@@ -21,6 +27,8 @@ void m_Init_GPIOC_Clock(void);
 void m_Init_USART2_Clock(void);
 //Enable USART1
 void m_Init_USART1_Clock(void);
+//Enable I2c1
+void m_Init_I2C_Clock(void);
 //Setting System clock to predefined - 8MHz
 void m_System_Clock(void);
 //Use MCO as System clock

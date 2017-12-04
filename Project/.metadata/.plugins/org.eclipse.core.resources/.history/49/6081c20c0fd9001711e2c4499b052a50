@@ -1,0 +1,13 @@
+/*
+ * config_pwm.c
+ *
+ *  Created on: 2017. 12. 5.
+ *      Author: hw_3
+ */
+
+
+void m_Init_PWM(TIM_TypeDef* TIMx){
+	TIM_TimeBaseInitTypeDef time_tb;
+	TIM_OCInitTypeDef tim_oc_;
+
+}

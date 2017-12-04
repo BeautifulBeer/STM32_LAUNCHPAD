@@ -1,0 +1,18 @@
+/*
+ * config_exti.h
+ *
+ *  Created on: 2017. 12. 4.
+ *      Author: hw_3
+ */
+
+#ifndef CONFIG_EXTI_H_
+#define CONFIG_EXTI_H_
+
+#include <stm32f10x_exti.h>
+
+
+
+void m_Init_EXTI_Clock();
+void m_EXTI_GPIO_Interrupt();
+
+#endif /* CONFIG_EXTI_H_ */

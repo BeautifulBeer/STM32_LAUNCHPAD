@@ -1,0 +1,12 @@
+/*
+ * config_pwm.c
+ *
+ *  Created on: 2017. 12. 5.
+ *      Author: hw_3
+ */
+
+
+void m_Init_PWM_TIM2(){
+	TIM_ICInitTypeDef tim_ic_;
+	TIM_PWMIConfig()
+}

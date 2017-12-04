@@ -18,6 +18,7 @@
 							<builder buildPath="${workspace_loc:/launchpad}/Debug" id="com.arm.toolchain.baremetal.builder.291933113" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" superClass="com.arm.toolchain.baremetal.builder"/>
 							<tool id="com.arm.tool.c.compiler.baremetal.exe.debug.2080916186" name="ARM C Compiler 5" superClass="com.arm.tool.c.compiler.baremetal.exe.debug">
 								<option id="com.arm.tool.c.compiler.option.incpath.1539556967" name="Include path (-I)" superClass="com.arm.tool.c.compiler.option.incpath" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/MPR121}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/Libraries}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/Libraries/CMSIS/CoreSupport}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/Libraries/CMSIS/DeviceSupport}&quot;"/>
@@ -26,6 +27,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/Libraries/STM32F10x_StdPeriph_Driver_v3.5/src}&quot;"/>
 								</option>
 								<option id="com.arm.tool.c.compiler.option.targetcpu.1640273538" name="Target CPU (--cpu)" superClass="com.arm.tool.c.compiler.option.targetcpu" value="cortex-m3" valueType="string"/>
+								<option id="com.arm.tool.c.compiler.baremetal.exe.debug.option.opt.415071682" name="Optimization level" superClass="com.arm.tool.c.compiler.baremetal.exe.debug.option.opt" value="com.arm.tool.c.compiler.option.optlevel.max" valueType="enumerated"/>
 								<inputType id="com.arm.tool.c.compiler.input.1053265162" superClass="com.arm.tool.c.compiler.input"/>
 								<inputType id="com.arm.tool.cpp.compiler.input.1510818400" superClass="com.arm.tool.cpp.compiler.input"/>
 							</tool>
@@ -34,7 +36,7 @@
 								<option id="com.arm.tool.assembler.option.cpu.195164873" name="Target CPU (--cpu)" superClass="com.arm.tool.assembler.option.cpu" value="cortex-m3" valueType="string"/>
 							</tool>
 							<tool id="com.arm.tool.c.linker.613910695" name="ARM Linker 5" superClass="com.arm.tool.c.linker">
-								<option id="com.arm.tool.c.linker.option.scatter.1479650972" name="Scatter file (--scatter)" superClass="com.arm.tool.c.linker.option.scatter" value="C:\Users\hw_3\Desktop\git_repository\Project\launchpad\stm32-test.sct" valueType="string"/>
+								<option id="com.arm.tool.c.linker.option.scatter.1479650972" name="Scatter file (--scatter)" superClass="com.arm.tool.c.linker.option.scatter" value="C:\Users\hw_3\Desktop\2017_stm310_launchpad-taeohkim\Project\launchpad\stm32-test.sct" valueType="string"/>
 								<option id="com.arm.tool.c.linker.option.entry.852853676" name="Image entry point (--entry)" superClass="com.arm.tool.c.linker.option.entry" value="main" valueType="string"/>
 								<option id="com.arm.tool.c.linker.option.cpu.963213529" name="Target CPU (--cpu)" superClass="com.arm.tool.c.linker.option.cpu" value="cortex-m3" valueType="string"/>
 							</tool>
