@@ -25,5 +25,10 @@ void m_Init_USART2_NVIC(void);
 void m_Init_USART1_NVIC(void);
 //Initialize nested vectored interrupt controller configuration for I2C1, MPR121
 void m_Init_MPR121_NVIC(void);
+//Initialize nested vectored interrupt controller configuration for TIM4
+void m_Init_TIM4_NVIC(void);
+//Initialize nested vectored interrupt controller configuration for TIM2
+void m_Init_TIM2_NVIC(void);
+
 
 #endif /* CONFIG_INTERRUPT_H_ */

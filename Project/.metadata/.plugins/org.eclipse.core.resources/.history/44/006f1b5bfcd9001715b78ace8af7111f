@@ -1,0 +1,120 @@
+#include "stm32f10x_rcc.h"
+#include "stm32f10x_gpio.h"
+#include "stm32f10x_tim.h"
+#include "misc.h"
+#include "init/config_system.h"
+static int led_status = 1;
+
+void SysInit(void) {
+   /* Set HSION bit */
+   /* Internal Clock Enable */
+   RCC->CR |= 0x00000001;
+
+   /* Reset SW, HPRE, PPRE1, PPRE2, ADCPRE and MCO bits */
+   RCC->CFGR &= 0xF0FF0000;
+
+   /* Reset HSEON, CSSON and PLLON bits */
+   RCC->CR &= 0xFEF6FFFF;
+
+   /* Reset HSEBYP bit */
+   RCC->CR &= 0xFFFBFFFF;
+
+   /* Reset PLLSRC, PLLXTPRE, PLLMUL and USBPRE/OTGFSPRE bits */
+   RCC->CFGR &= 0xFF80FFFF;
+
+   /* Reset PLL2ON and PLL3ON bits */
+   RCC->CR &= 0xEBFFFFFF;
+
+   /* Disable all interrupts and clear pending bits  */
+   RCC->CIR = 0x00FF0000;
+
+   /* Reset CFGR2 register */
+   RCC->CFGR2 = 0x00000000;
+}
+
+
+
+void NVIC_Configuration(void){
+   NVIC_InitTypeDef NVIC_Initstructure;
+   NVIC_Initstructure.NVIC_IRQChannel = TIM4_IRQn;
+   NVIC_Initstructure.NVIC_IRQChannelPreemptionPriority = 0;
+   NVIC_Initstructure.NVIC_IRQChannelSubPriority = 0;
+   NVIC_Initstructure.NVIC_IRQChannelCmd = ENABLE;
+   NVIC_Init(&NVIC_Initstructure);
+}
+
+void InterruptEnable(){
+   RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
+   RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);//Interrupt
+   RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM4, ENABLE);//TIM2
+}
+
+void mcu_output(){
+   GPIO_InitTypeDef InitStructure;
+   InitStructure.GPIO_Pin = GPIO_Pin_8;
+   InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+   InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+   GPIO_Init(GPIOA, &InitStructure);
+
+}
+
+void TIM4_IRQHandler(void)
+{
+
+   if(led_status){
+      GPIO_SetBits(GPIOD,GPIO_Pin_3);
+      led_status=0;
+   }else{
+      GPIO_ResetBits(GPIOD,GPIO_Pin_3);
+      led_status=1;
+   }
+   TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
+}
+
+/*
+void delay(int i){
+   int j;
+   for(j=0; j<=i * 100000; j++);
+}
+*/
+
+void TIM_configuration(){
+   TIM_TimeBaseInitTypeDef TIM_TimeBase_Structure;
+
+   TIM_TimeBase_Structure.TIM_Period = 2000;
+   TIM_TimeBase_Structure.TIM_Prescaler = 10000;
+   TIM_TimeBase_Structure.TIM_ClockDivision = TIM_CKD_DIV1;
+   TIM_TimeBase_Structure.TIM_CounterMode = TIM_CounterMode_Up;
+   TIM_TimeBaseInit(TIM4, &TIM_TimeBase_Structure);
+
+   TIM_Cmd(TIM4,ENABLE);
+   TIM_ITConfig(TIM4,TIM_IT_Update, ENABLE);
+
+
+}
+void Configure_LED() {
+   GPIO_InitTypeDef GPIO_init;
+
+   RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOD, ENABLE);
+
+   GPIO_init.GPIO_Mode = GPIO_Mode_Out_PP;
+   GPIO_init.GPIO_Pin = (GPIO_Pin_2 | GPIO_Pin_3 | GPIO_Pin_4 | GPIO_Pin_7);
+   GPIO_init.GPIO_Speed = GPIO_Speed_50MHz;
+
+   GPIO_Init(GPIOD, &GPIO_init);
+}
+
+int main(){
+   SysInit();
+   SetSysClock();
+   InterruptEnable();
+   NVIC_Configuration();
+   TIM_configuration();
+   Configure_LED();
+   //mcu_output();
+   //GPIOD->BSRR = GPIO_BSRR_BS3;
+
+   while(1){
+   }
+}
+

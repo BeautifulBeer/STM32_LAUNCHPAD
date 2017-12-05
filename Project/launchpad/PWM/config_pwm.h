@@ -10,22 +10,33 @@
 
 
 #include <stm32f10x_tim.h>
+#include <stm32f10x_gpio.h>
 
-/*
- * SK6812 PWM
- * Input Code 0 : T0H(0.3u) + T0L(0.9u)
- * Input Code 1 : T1H(0.6u) + T1L(0.6u)
- * Reset Code : Treset(80u)
- * ARR = 4
- * 0 - CRRx = 1 (Value)
- * 1 - CRRx = 2 (Value)
- */
+#define SYS_CLK					 	40000000
+//#define TIMER_FREQ 					10000000 //0.1us
+#define TIMER_FREQ 					40000000
+#define PWM_FREQ 					833333  //1.2us
+//#define PRESCALAR 					(SYS_CLK / TIMER_FREQ - 1)
+#define PRESCALAR 					0
+//#define PRESCALAR 					47
+//#define PERIOD						(TIMER_FREQ / PWM_FREQ - 1)
+#define PERIOD						47
+//#define PERIOD						11
+//#define _DUTY_CYCLE(cycle)			(((PERIOD + 1) * cycle) / 100 -1)
+//#define PUL_DUTY0					_DUTY_CYCLE(0)
+#define PUL_DUTY0
+//#define PUL_DUTY25					_DUTY_CYCLE(25) // NeoPixel LED 0
+#define PUL_DUTY25					11
+//#define PUL_DUTY50					_DUTY_CYCLE(50) // NeoPixel LED 1
+#define PUL_DUTY50					23
 
 
 //Initialize TIM_Timebase
-void m_Init_TIM2();
-//For PWM
-void m_Init_PWM(TIM_TypeDef* TIMx);
+void m_Init_PWM_TIM(TIM_TypeDef* TIMx);
+//Initialize GPIOE configuration for USART2
+void m_Init_TIM4_CH3_GPIOB(void);
+void m_Init_TIM2(void);
+void m_Init_TIM4(void);
 
 
 #endif /* CONFIG_PWM_H_ */

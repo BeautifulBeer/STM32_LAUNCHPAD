@@ -52,7 +52,7 @@ void m_System_Clock(void){
 	    /* PCLK2 = HCLK / 1 */
 	    RCC_PCLK2Config(RCC_HCLK_Div1);
 	    /* PCLK1 = HCLK / 2 */
-	    RCC_PCLK1Config(RCC_HCLK_Div2);
+	    RCC_PCLK1Config(RCC_HCLK_Div1);
 	    /* Enable PLL2 */
 	   	RCC_PLL2Cmd(ENABLE);
 	   	RCC_PREDIV2Config(RCC_PREDIV2_Div5);
@@ -73,6 +73,7 @@ void m_System_Clock(void){
 	    while (RCC_GetSYSCLKSource() != RCC_CFGR_SWS_PLL);
 	}
 }
+
 void m_Init_MCO_GPIOA(void){
 	GPIO_InitTypeDef gpio_;
 	gpio_.GPIO_Mode = GPIO_Mode_AF_PP;
@@ -91,4 +92,120 @@ void m_MCO_Enable(void){
 
 void m_Init_TIM2_Clock(void){
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
+}
+
+void m_Init_TIM4_Clock(void){
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM4, ENABLE);
+}
+
+void SetSysClock(void) //40MHz
+{
+   volatile int StartUpCounter = 0, HSEStatus = 0;
+
+   /* SYSCLK, HCLK, PCLK2 and PCLK1 configuration ---------------------------*/
+   /* Enable HSE */
+   RCC->CR |= (RCC_CR_HSEON);
+
+   /* Wait till HSE is ready and if Time out is reached exit */
+   do
+   {
+      HSEStatus = RCC->CR & RCC_CR_HSERDY;
+      StartUpCounter++;
+   } while((HSEStatus == 0) && (StartUpCounter != HSE_STARTUP_TIMEOUT));
+
+   if ((RCC->CR & RCC_CR_HSERDY) != RESET)
+   {
+      HSEStatus = 0x01;
+   }
+   else
+   {
+      HSEStatus = 0x00;
+   }
+
+   if (HSEStatus == 0x01)
+   {
+      /* Enable Prefetch Buffer */
+      FLASH->ACR |= FLASH_ACR_PRFTBE;
+
+      /* Flash 0 wait state */
+      FLASH->ACR &= (~FLASH_ACR_LATENCY);
+      FLASH->ACR |= FLASH_ACR_LATENCY_0;
+
+      /* HCLK = SYSCLK / 2 */
+      RCC->CFGR |= RCC_CFGR_HPRE_DIV2;
+
+      /* PCLK2 = HCLK / 2 */
+      RCC->CFGR |= RCC_CFGR_PPRE2_DIV2;
+
+      /* PCLK1 = HCLK */
+      RCC->CFGR |= RCC_CFGR_PPRE1_DIV1;
+
+      /* Configure PLLs ------------------------------------------------------*/
+      /* PLL configuration: PLLCLK = PREDIV1 * 5 = 40MHz */
+      RCC->CFGR &= ~(RCC_CFGR_PLLXTPRE | RCC_CFGR_PLLSRC | RCC_CFGR_PLLMULL);
+      RCC->CFGR |= (RCC_CFGR_PLLXTPRE_PREDIV1 | RCC_CFGR_PLLSRC_PREDIV1 |
+            RCC_CFGR_PLLMULL5);
+
+      /* PLL2 configuration: PLL2CLK = (HSE / 5) * 8 = 40MHz */
+      /* PREDIV1 configuration: PREDIV1CLK = PLL2 / 5 = 8MHz */
+      RCC->CFGR2 &= (~(RCC_CFGR2_PREDIV2 | RCC_CFGR2_PLL2MUL |
+            RCC_CFGR2_PREDIV1 | RCC_CFGR2_PREDIV1SRC));
+      RCC->CFGR2 |= (RCC_CFGR2_PREDIV2_DIV5 | RCC_CFGR2_PLL2MUL8 |
+            RCC_CFGR2_PREDIV1SRC_PLL2 | RCC_CFGR2_PREDIV1_DIV5);
+
+      /* Enable PLL2 */
+      RCC->CR |= RCC_CR_PLL2ON;
+      /* Wait till PLL2 is ready */
+      while((RCC->CR & RCC_CR_PLL2RDY) == 0)
+      {
+      }
+
+      /* Enable PLL */
+      RCC->CR |= RCC_CR_PLLON;
+
+      /* Wait till PLL is ready */
+      while((RCC->CR & RCC_CR_PLLRDY) == 0)
+      {
+      }
+
+      /* Select PLL as system clock source */
+      RCC->CFGR &= (~(RCC_CFGR_SW));
+      RCC->CFGR |= RCC_CFGR_SW_PLL;
+
+      /* Wait till PLL is used as system clock source */
+      while ((RCC->CFGR & RCC_CFGR_SWS) != 0x08)
+      {
+      }
+   }
+   else
+   { /* If HSE fails to start-up, the application will have wrong clock
+         configuration. User can add here some code to deal with this error */
+   }
+}
+
+void SysInit(void) {
+   /* Set HSION bit */
+   /* Internal Clock Enable */
+   RCC->CR |= 0x00000001;
+
+   /* Reset SW, HPRE, PPRE1, PPRE2, ADCPRE and MCO bits */
+   RCC->CFGR &= 0xF0FF0000;
+
+   /* Reset HSEON, CSSON and PLLON bits */
+   RCC->CR &= 0xFEF6FFFF;
+
+   /* Reset HSEBYP bit */
+   RCC->CR &= 0xFFFBFFFF;
+
+   /* Reset PLLSRC, PLLXTPRE, PLLMUL and USBPRE/OTGFSPRE bits */
+   RCC->CFGR &= 0xFF80FFFF;
+
+   /* Reset PLL2ON and PLL3ON bits */
+   RCC->CR &= 0xEBFFFFFF;
+
+   /* Disable all interrupts and clear pending bits  */
+   RCC->CIR = 0x00FF0000;
+
+   /* Reset CFGR2 register */
+   RCC->CFGR2 = 0x00000000;
 }

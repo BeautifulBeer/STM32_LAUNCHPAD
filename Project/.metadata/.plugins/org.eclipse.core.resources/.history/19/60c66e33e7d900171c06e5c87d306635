@@ -1,0 +1,41 @@
+/*
+ * config_pwm.h
+ *
+ *  Created on: 2017. 12. 5.
+ *      Author: hw_3
+ */
+
+#ifndef CONFIG_PWM_H_
+#define CONFIG_PWM_H_
+
+
+#include <stm32f10x_tim.h>
+
+#define SYS_CLK					 	80000000
+#define TIMER_FREQ 					3333333 //0.3us
+#define PWM_FREQ 					833333  //1.2us
+#define PRESCAL 					(SYS_CLK / TIMER_FREQ - 1)
+#define PERIOD						(TIMER_FREQ / PWM_FREQ - 1)
+#define _DUTY_CYCLE(cycle)			((PERIOD + 1) * cycle) / 100 -1
+#define PUL_DUTY0					_DUTY_CYCLE(0)
+#define PUL_DUTY25					_DUTY_CYCLE(25) // NeoPixel LED 0
+#define PUL_DUTY50					_DUTY_CYCLE(50) // NeoPixel LED 1
+
+/*
+ * SK6812 PWM
+ * Input Code 0 : T0H(0.3u) + T0L(0.9u) - DutyCycle 25%
+ * Input Code 1 : T1H(0.6u) + T1L(0.6u) - DutyCycle 50%
+ * Reset Code : Treset(80u) - DutyCycle - 0%
+ * ARR = 4
+ * 0 - CRRx = 1 (Value)
+ * 1 - CRRx = 2 (Value)
+ */
+
+
+//Initialize TIM_Timebase
+void m_Init_PWM_TIM(TIM_TypeDef* TIMx);
+//For PWM
+void m_Init_PWM(TIM_TypeDef* TIMx);
+
+
+#endif /* CONFIG_PWM_H_ */

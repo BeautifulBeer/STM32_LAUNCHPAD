@@ -15,8 +15,11 @@
 #include <system_stm32f10x.h>
 
 
+
 //Enable Timer 2
 void m_Init_TIM2_Clock(void);
+//Enable Timer 4
+void m_Init_TIM4_Clock(void);
 //Enable AFIO
 void m_Init_AFIO_Clock(void);
 //Enable GPIOA
@@ -39,5 +42,8 @@ void m_System_Clock(void);
 void m_MCO_Enable(void);
 //Enable MCO - GPIOA 8 Pin
 void m_Init_MCO_GPIOA(void);
-
+//System Clock Setting
+void SetSysClock(void);
+//System Init
+void SysInit(void);
 #endif /* SYSTEM_CONFIG_H_ */
