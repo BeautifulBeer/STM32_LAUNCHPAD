@@ -115,6 +115,6 @@
 <stringAttribute key="model_params" value=""/>
 <stringAttribute key="rddi_type" value="rddi-debug-rvi"/>
 <booleanAttribute key="runAfterConnect" value="false"/>
-<stringAttribute key="rvi_address" value="USB:003869"/>
+<stringAttribute key="rvi_address" value="USB:003871"/>
 <stringAttribute key="watchpoints" value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;US-ASCII&quot; ?&gt;&#13;&#10;&lt;watchpoint&gt;&#13;&#10;&lt;/watchpoint&gt;&#13;&#10;"/>
 </launchConfiguration>

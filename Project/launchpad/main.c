@@ -19,8 +19,7 @@ flash load "./launchpad/Debug/launchpad.axf"
 #include <lcd.h>
 #include <touch.h>
 #include "core_cm3.h"
-
-
+#include "MPR121/config_mpr121.h"
 
 #define CONST_CHRACTER_ROW 2
 #define CONST_CHRACTER_COL 2
@@ -36,6 +35,8 @@ int EXTI2_flag;
 int EXTI3_flag;
 int EXTI4_flag;
 int EXTI5_flag;
+
+uint8_t I2C_Buffer[2];
 
 
 //uint16_t MUSIC_NOTE[CONST_MUSIC_NOTE_ROW] ={
@@ -82,6 +83,13 @@ void InterruptEnable(){
 //		}
 //	}
 //}
+
+void EXTI0_IRQHandler(void) {
+	if(EXTI_GetITStatus(EXTI_Line0) != RESET){
+		EXTI0_flag = 1;
+		EXTI_ClearITPendingBit(EXTI_Line0);
+	}
+}
 
 
 void EXTI4_IRQHandler(void){ // draw music status
@@ -136,8 +144,6 @@ void Configure_LED() {
    GPIO_Init(GPIOD, &GPIO_init);
 }
 
-
-
 int main(){
 	/*char buffer_[BT_STR_MAX_LENGTH];
 	//System Configuration Initialization
@@ -177,16 +183,31 @@ int main(){
 //	GPIOD->BSRR = GPIO_BSRR_BS3;
 //	GPIOD->BSRR = GPIO_BSRR_BS4;
 //	GPIOD->BSRR = GPIO_BSRR_BS7;
+
+	uint16_t lasttouched = 0x0;
+	uint16_t currtouched = 0x0;
+
 	SystemInit();
 	Configure_LED();
 	LCD_Init();
 	m_Init_AFIO_Clock();
+	m_Init_I2C_Clock();
+	m_Init_GPIOB_Clock();
+	m_Init_GPIOE_Clock();
+	m_Init_MPR121(I2C_Buffer);
 	m_EXTI_GPIO_Interrupt(GPIO_PortSourceGPIOC, GPIO_PinSource4, EXTI_Line4, EXTI4_IRQn);
 	m_EXTI_GPIO_Interrupt(GPIO_PortSourceGPIOC, GPIO_PinSource5, EXTI_Line5, EXTI9_5_IRQn); // volume up
 	m_EXTI_GPIO_Interrupt(GPIO_PortSourceGPIOC, GPIO_PinSource2, EXTI_Line2, EXTI2_IRQn); // volume down
+	m_EXTI_GPIO_Interrupt(GPIO_PortSourceGPIOE, GPIO_PinSource0, EXTI_Line0, EXTI0_IRQn); // volume down
 	//Main Loop
 	while(1){
-
+		m_printState(lasttouched, currtouched, I2C_Buffer);
+		GPIOD->BSRR = GPIO_BSRR_BR2;
+		if(EXTI0_flag){
+			//Show_LCD_Status();
+			GPIOD->BSRR = GPIO_BSRR_BS2;
+			EXTI0_flag = 0;
+		}
 		if(EXTI4_flag){
 			//Show_LCD_Status();
 			EXTI4_flag = 0;

@@ -21,8 +21,12 @@ void m_Init_TIM2_Clock(void);
 void m_Init_AFIO_Clock(void);
 //Enable GPIOA
 void m_Init_GPIOA_Clock(void);
+//Enable GPIOA
+void m_Init_GPIOB_Clock(void);
 //Enable GPIOC
 void m_Init_GPIOC_Clock(void);
+//Enable GPIOC
+void m_Init_GPIOE_Clock(void);
 //Enable USART2
 void m_Init_USART2_Clock(void);
 //Enable USART1

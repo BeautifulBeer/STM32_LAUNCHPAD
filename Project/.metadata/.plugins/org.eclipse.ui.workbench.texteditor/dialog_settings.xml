@@ -3,18 +3,19 @@
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog_dialogBounds">
 		<item value="261" key="DIALOG_WIDTH"/>
 		<item value="157" key="DIALOG_Y_ORIGIN"/>
-		<item value="956" key="DIALOG_X_ORIGIN"/>
 		<item value="381" key="DIALOG_HEIGHT"/>
+		<item value="956" key="DIALOG_X_ORIGIN"/>
 		<item value="1|맑은 고딕|9.0|0|WINDOWS|1|-12|0|0|0|400|0|0|0|1|0|0|0|0|맑은 고딕" key="DIALOG_FONT_NAME"/>
 	</section>
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog">
 		<item value="true" key="wrap"/>
-		<item value="false" key="casesensitive"/>
 		<item value="false" key="isRegEx"/>
+		<item value="false" key="casesensitive"/>
 		<item value="false" key="incremental"/>
 		<item value="false" key="wholeword"/>
-		<item value="begin" key="selection"/>
+		<item value="" key="selection"/>
 		<list key="findhistory">
+			<item value="i2cdev"/>
 			<item value="begin"/>
 			<item value="clk"/>
 			<item value="clock"/>
@@ -22,7 +23,6 @@
 			<item value="clockspeed"/>
 			<item value="ownadd"/>
 			<item value="buffer"/>
-			<item value="_i2caddr"/>
 		</list>
 		<list key="replacehistory">
 			<item value="BUFFER"/>

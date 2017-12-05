@@ -19,6 +19,10 @@ void m_Init_GPIOC_Clock(void){
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC,ENABLE);
 }
 
+void m_Init_GPIOE_Clock(void){
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOE,ENABLE);
+}
+
 void m_Init_USART2_Clock(void){
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2,ENABLE);
 }
