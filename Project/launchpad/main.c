@@ -22,13 +22,11 @@ flash load "./launchpad/Debug/launchpad.axf"
 #include "MPR121/config_mpr121.h"
 #include "PWM/config_pwm.h"
 
-//static int led_status = 1;
-static int led_status_update = 1;
-static int led_status_cc3 = 1;
 
-#define CONST_CHRACTER_ROW 2
-#define CONST_CHRACTER_COL 2
-#define CONST_MUSIC_NOTE_ROW 24
+#define CONST_CHRACTER_ROW 			2
+#define CONST_CHRACTER_COL 			2
+#define CONST_MUSIC_NOTE_ROW 		24
+#define RGB_BIT_SIZE				8
 
 //TFT LCD Variables
 int Xposition;
@@ -62,30 +60,38 @@ uint32_t DestAddr;
 //};
 
 
-
 //I2C Variables
 uint16_t lasttouched;
 uint16_t currtouched;
 uint8_t I2C_Buffer[2];
 
 //System State
+
+//Interrupt
 int EXTI0_flag;
 int EXTI1_flag;
 int EXTI2_flag;
 int EXTI3_flag;
 int EXTI4_flag;
 int EXTI5_flag;
-int TIM4_IT_UPDATE_flag;
-int TIM4_CC3_flag;
+
+//PMM
+//static int pwm_delay;
+//static int TIM4_IT_UPDATE_flag;
+int cur_pixel, cur_rgb, cur_pos, cur_reset;
+uint8_t PIXEL_PATTERN_1[CONST_PIXEL_NUM][CONST_RGB_NUM] = {
+		{235, 245, 127},
+		{13 , 134, 178},
+		{56 , 200, 155},
+		{15 , 40 , 113},
+		{175, 100, 35 },
+		{51 , 158, 147},
+		{175, 100, 52 },
+		{78 , 200, 3  }
+};
 
 void printObject(int** data, int start_x, int start_y, int data_row, int data_col){
 	//for()
-}
-
-void InterruptEnable(){
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);//Interrupt
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE);
 }
 
 //void Show_LCD_Status(){
@@ -126,19 +132,35 @@ void EXTI2_IRQHandler(void){ //volume down status
 	}
 }
 
-void TIM4_IRQHandler(void){
-	//GPIO_SetBits(GPIOD, GPIO_Pin_2);
-
-	if(TIM_GetITStatus(TIM4, TIM_IT_Update) != RESET){
-		TIM4_IT_UPDATE_flag =1;
-		TIM_ClearITPendingBit(TIM4, TIM_IT_Update);
-	}
-	if(TIM_GetITStatus(TIM4, TIM_IT_CC3) != RESET){
-		TIM4_CC3_flag =1;
-		TIM_ClearITPendingBit(TIM4, TIM_IT_CC3);
+void TIM3_IRQHandler(void){
+	if(TIM_GetITStatus(TIM3, TIM_IT_CC2) != RESET){
+		if(cur_pixel != CONST_PIXEL_NUM){
+			if(cur_rgb != CONST_RGB_NUM){
+				if(cur_pos != RGB_BIT_SIZE){
+					m_send_BIT(TIM3, TIM_Channel_2,
+							PIXEL_PATTERN_1[cur_pixel][cur_rgb] & _BV(7 - cur_pos));
+					cur_pos++;
+				}else{
+					cur_pos = 0;
+					cur_rgb++;
+				}
+			}else{
+				cur_rgb = 0;
+				cur_pixel++;
+			}
+		}else{
+			if(cur_reset != CONST_RESET_PERIOD){
+				m_send_BIT(TIM3, TIM_Channel_2, 2);
+				cur_reset++;
+			}else{
+				//Initialize all variables
+				cur_reset = 0;
+				cur_pixel = 0;
+			}
+		}
+		TIM_ClearITPendingBit(TIM3, TIM_IT_CC2);
 	}
 }
-
 
 //void USART2_IRQHandler(void){
 //	if (USART_GetITStatus(USART2, USART_IT_RXNE) != RESET) {
@@ -170,6 +192,7 @@ void Configure_LED() {
 }
 
 int main(){
+	//int delay;
 	//char buffer_[BT_STR_MAX_LENGTH];
 	//System Configuration Initialization
 	SysInit();
@@ -177,12 +200,14 @@ int main(){
 	SetSysClock();
 
 	//Clock Enable
-	m_Init_GPIOA_Clock();
+	m_Init_GPIO_Clock(GPIOA);
+	m_Init_GPIO_Clock(GPIOB);
+	m_Init_GPIO_Clock(GPIOC);
+	m_Init_GPIO_Clock(GPIOE);
 	m_Init_AFIO_Clock();
 	m_Init_I2C_Clock();
-	m_Init_GPIOB_Clock();
-	m_Init_GPIOE_Clock();
-	m_Init_TIM4_Clock();
+	m_Init_TIM_Clock(TIM3);
+
 
 	//USARTx
 //	m_Init_USART2_Clock();
@@ -196,7 +221,7 @@ int main(){
 //	m_Init_BT_USART1_GPIOA();
 //	m_Init_BT_USART2_GPIOA();
 	//MCO Port Init
-	//m_Init_MCO_GPIOA();
+	m_Init_MCO_GPIOA();
 
 	//Initialize USART1/2
 //	m_Init_BT_USART1();
@@ -205,14 +230,17 @@ int main(){
 	//Interrupt Configuration - NVIC
 //	m_Init_USART2_NVIC();
 //	m_Init_USART1_NVIC();
-	m_Init_TIM4_NVIC();
+	m_Init_TIM_NVIC(TIM3);
 
 
-	//Timer GPIO Setting
-	m_Init_TIM4_CH3_GPIOB();
-	m_Init_PWM_TIM(TIM4);
-	//m_Init_TIM4();
-
+	//Timer PWM PA7 Should be selected
+	//Timer Initialization - GPIO setting
+	m_Init_TIM(TIM3, PERIOD, PRESCALAR);
+	m_Init_PWM_GPIO(GPIOA, GPIO_Pin_6, 1);
+	m_Init_PWM_GPIO(GPIOA, GPIO_Pin_7, 1);
+	m_Init_PWM_GPIO(GPIOB, GPIO_Pin_0, 1);
+	m_Init_PWM_GPIO(GPIOB, GPIO_Pin_1, 1);
+	m_Init_PWM_TIM(TIM3, 1, 1, 1, 1);
 
 	//External Interrupt Configuration - EXTI
 	//m_EXTI_GPIO_Interrupt(GPIO_PortSourceGPIOC, GPIO_PinSource4, EXTI_Line4, EXTI4_IRQn);
@@ -223,13 +251,7 @@ int main(){
 
 //	m_USART_DataSend(USART2, "AT+BTSCAN", buffer_);
 //
-	//m_MCO_Enable();
-
-//	GPIOD->BSRR = GPIO_BSRR_BS2;
-//	GPIOD->BSRR = GPIO_BSRR_BS3;
-//	GPIOD->BSRR = GPIO_BSRR_BS4;
-//	GPIOD->BSRR = GPIO_BSRR_BS7;
-
+	m_MCO_Enable();
 
 	//Module Initialization
 	//m_Init_MPR121(I2C_Buffer);
@@ -240,8 +262,7 @@ int main(){
 
 	//Main Loop
 	while(1){
-//		m_printState(lasttouched, currtouched, I2C_Buffer);
-//		GPIOD->BSRR = GPIO_BSRR_BR2;
+		//m_printState(lasttouched, currtouched, I2C_Buffer);
 		if(EXTI0_flag){
 			//Show_LCD_Status();
 			GPIOD->BSRR = GPIO_BSRR_BS2;
@@ -261,23 +282,10 @@ int main(){
 			LCD_ShowNum(100, 100, DestAddr--, 4, BLACK, WHITE);
 			EXTI2_flag = 0;
 		}
-		if(TIM4_IT_UPDATE_flag) {
-			if(led_status_update){
-				GPIO_SetBits(GPIOD,GPIO_Pin_3);
-				led_status_update=0;
-			}else{
-				GPIO_ResetBits(GPIOD,GPIO_Pin_3);
-				led_status_update=1;
-			}
-		}
-		if(TIM4_CC3_flag) {
-			if(led_status_cc3){
-				GPIO_SetBits(GPIOD,GPIO_Pin_4);
-				led_status_cc3=0;
-			}else{
-				GPIO_ResetBits(GPIOD,GPIO_Pin_4);
-				led_status_cc3=1;
-			}
-		}
+		/*if(LED_DATASEND) {
+			m_send_pixel_data(&TIM4_IT_UPDATE_flag, PIXEL_PATTERN_1);
+			m_delay(&TIM4_IT_UPDATE_flag, RESET_CODE);
+
+		}*/
 	}
 }

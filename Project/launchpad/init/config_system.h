@@ -16,20 +16,12 @@
 
 
 
-//Enable Timer 2
-void m_Init_TIM2_Clock(void);
-//Enable Timer 4
-void m_Init_TIM4_Clock(void);
+//Enable TIMER
+void m_Init_TIM_Clock(TIM_TypeDef* TIMx);
 //Enable AFIO
 void m_Init_AFIO_Clock(void);
-//Enable GPIOA
-void m_Init_GPIOA_Clock(void);
-//Enable GPIOA
-void m_Init_GPIOB_Clock(void);
-//Enable GPIOC
-void m_Init_GPIOC_Clock(void);
-//Enable GPIOC
-void m_Init_GPIOE_Clock(void);
+//Enable GPIOx
+void m_Init_GPIO_Clock(GPIO_TypeDef* GPIOx);
 //Enable USART2
 void m_Init_USART2_Clock(void);
 //Enable USART1

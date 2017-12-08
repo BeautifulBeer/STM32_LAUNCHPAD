@@ -34,18 +34,20 @@ void m_Init_MPR121_NVIC(void) {
   NVIC_Init(&nvic_init_);
 }
 
-void m_Init_TIM4_NVIC(void){
+void m_Init_TIM_NVIC(TIM_TypeDef* TIMx){
 	NVIC_InitTypeDef nvic_init_;
-	nvic_init_.NVIC_IRQChannel = TIM4_IRQn;
-	nvic_init_.NVIC_IRQChannelPreemptionPriority = 0;
-	nvic_init_.NVIC_IRQChannelSubPriority = 1;
-	nvic_init_.NVIC_IRQChannelCmd = ENABLE;
-	NVIC_Init(&nvic_init_);
-}
-
-void m_Init_TIM2_NVIC(void){
-	NVIC_InitTypeDef nvic_init_;
-	nvic_init_.NVIC_IRQChannel = TIM2_IRQn;
+	if(TIMx == TIM1){
+		//Default Update Interrupt
+		nvic_init_.NVIC_IRQChannel = TIM1_UP_IRQn;
+	}else if(TIMx == TIM2){
+		nvic_init_.NVIC_IRQChannel = TIM2_IRQn;
+	}else if(TIMx == TIM3){
+		nvic_init_.NVIC_IRQChannel = TIM3_IRQn;
+	}else if(TIMx == TIM4){
+		nvic_init_.NVIC_IRQChannel = TIM4_IRQn;
+	}else if(TIMx == TIM5){
+		nvic_init_.NVIC_IRQChannel = TIM5_IRQn;
+	}
 	nvic_init_.NVIC_IRQChannelPreemptionPriority = 0;
 	nvic_init_.NVIC_IRQChannelSubPriority = 0;
 	nvic_init_.NVIC_IRQChannelCmd = ENABLE;

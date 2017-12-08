@@ -1,0 +1,51 @@
+/*
+ * config_pwm.h
+ *
+ *  Created on: 2017. 12. 5.
+ *      Author: hw_3
+ */
+
+#ifndef CONFIG_PWM_H_
+#define CONFIG_PWM_H_
+
+
+#include "../MPR121/Adafruit_MPR121.h"
+#include <stm32f10x_tim.h>
+#include <stm32f10x_gpio.h>
+
+#define SYS_CLK					 	40000000
+#define PWM_FREQ 					3333333  //1.2us
+//#define PRESCALAR 					(SYS_CLK / TIMER_FREQ - 1)
+#define PRESCALAR 					0
+#define PERIOD						11 //ARR
+
+#define DUTY_0						0
+#define DUTY_25
+#define DUTY_50
+
+#define CONST_PIXEL_NUM 			8
+#define CONST_RGB_NUM				3
+
+#define NEO_T0H 					1  // 0.3us
+#define NEO_T1H						2  // 0.6us
+#define NEO_T0L						3  // 0.9us
+#define NEO_T1L						2  // 0.6us
+#define RESET_CODE					17 // 81us
+
+
+
+void m_Init_PWM_TIM(TIM_TypeDef* TIMx);
+//flag : 0 - Output Mode , flag : 1 - Alternative Output Mode
+void m_Init_PWM_GPIO(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pinx, uint8_t flag);
+void m_Init_TIM(TIM_TypeDef* TIMx, int Period, int Prescalar);
+
+//NeoPixel Data Send
+
+void m_send_pixel_data(int* tim_it_flag, uint8_t pixel_data[CONST_PIXEL_NUM][CONST_RGB_NUM]);
+void m_send_rgb(int* tim_it_flag, uint8_t red, uint8_t green, uint8_t blue);
+void m_send_bit(int* tim_it_flag, uint8_t bit);
+void m_send_reset(int* tim_it_flag);
+
+void m_delay(int* tim_it_flag, int delay_time);
+
+#endif /* CONFIG_PWM_H_ */
