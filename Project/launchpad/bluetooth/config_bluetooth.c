@@ -8,11 +8,11 @@
 #include "config_bluetooth.h"
 
 
-void m_Init_BT_USART3(void){
-	USART_DeInit(USART3);
-	m_Init_BT_USART(USART3);
-	USART_Cmd(USART3, ENABLE);
-	USART_ITConfig(USART3, USART_IT_RXNE, ENABLE);
+void m_Init_BT_USART1(void){
+	USART_DeInit(USART1);
+	m_Init_BT_USART(USART1);
+	USART_Cmd(USART1, ENABLE);
+	USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);
 }
 
 void m_Init_BT_USART2(void){
@@ -34,18 +34,17 @@ void m_Init_BT_USART(USART_TypeDef* USARTx){
 	USART_Init(USARTx, &usart_init_);
 }
 
-void m_Init_BT_USART3_GPIOC(void){
+void m_Init_BT_USART1_GPIOA(void){
 	GPIO_InitTypeDef gpio_init_;
 	//Tx configuration
-	gpio_init_.GPIO_Pin = GPIO_Pin_10;
+	gpio_init_.GPIO_Pin = GPIO_Pin_9;
 	gpio_init_.GPIO_Mode = GPIO_Mode_AF_PP;
 	gpio_init_.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_Init(GPIOC, &gpio_init_);
+	GPIO_Init(GPIOA, &gpio_init_);
 	//Rx configuration
-	gpio_init_.GPIO_Pin = GPIO_Pin_11;
+	gpio_init_.GPIO_Pin = GPIO_Pin_10;
 	gpio_init_.GPIO_Mode = GPIO_Mode_IN_FLOATING;
-	gpio_init_.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_Init(GPIOC, &gpio_init_);
+	GPIO_Init(GPIOA, &gpio_init_);
 }
 
 void m_Init_BT_USART2_GPIOA(void){
@@ -58,7 +57,6 @@ void m_Init_BT_USART2_GPIOA(void){
 	//Rx configuration
 	gpio_init_.GPIO_Pin = GPIO_Pin_3;
 	gpio_init_.GPIO_Mode = GPIO_Mode_IN_FLOATING;
-	gpio_init_.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_Init(GPIOA, &gpio_init_);
 }
 
@@ -75,59 +73,57 @@ void m_Init_BT_USART2_EXIT(void){
 	EXTI_Init(&exti_init_);
 }
 
-void m_Init_BT_USART3_EXIT(void){
+void m_Init_BT_USART1_EXIT(void){
 	EXTI_InitTypeDef exti_init_;
 	//EXTI line configuration
-	GPIO_EXTILineConfig(GPIO_PortSourceGPIOC, GPIO_PinSource11);
+	GPIO_EXTILineConfig(GPIO_PortSourceGPIOA, GPIO_PinSource10);
 	//Rx Interrupt
-	exti_init_.EXTI_Line = EXTI_Line11;
+	exti_init_.EXTI_Line = EXTI_Line10;
 	exti_init_.EXTI_LineCmd = ENABLE;
 	exti_init_.EXTI_Mode = EXTI_Mode_Interrupt;
 	exti_init_.EXTI_Trigger = EXTI_Trigger_Rising_Falling;
 	EXTI_Init(&exti_init_);
 }
 
-void m_USART_StringSend(USART_TypeDef* USARTx, char* str, char buffer_[MAX_LENGTH]){
+void m_USART_DataSend(USART_TypeDef* USARTx, char* str, char buffer_[BT_STR_MAX_LENGTH]){
 	int i;
-	if(str != NULL && strlen(str) <= MAX_LENGTH ){
+	uint16_t length = 0;
+	if(str != NULL && strlen(str) <= BT_STR_MAX_LENGTH ){
+		length = (uint16_t)strlen(str);
 		m_buffer_init(buffer_);
 		memcpy(buffer_, str, strlen(str) + 1);
-		for(i=0; i<MAX_LENGTH; i++){
+		m_USART_byteSend(USARTx, BD);
+		m_USART_byteSend(USARTx, BD);
+		m_USART_byteSend(USARTx, CR);
+		m_USART_byteSend(USARTx, LF);
+		m_USART_byteSend(USARTx, length);
+		m_USART_byteSend(USARTx, SD);
+		for(i=0; i<BT_STR_MAX_LENGTH; i++){
 			if(buffer_[i] != NULL){
-				m_USART_DataSend(USARTx, buffer_[i]);
+				m_USART_byteSend(USARTx, buffer_[i]);
 			}else{
 				break;
 			}
 		}
+		m_USART_byteSend(USARTx, ED);
+		m_USART_byteSend(USARTx, LF);
+		m_USART_byteSend(USARTx, CR);
+		m_USART_byteSend(USARTx, BD);
+		m_USART_byteSend(USARTx, BD);
 	}else{
 		//Violate function condition
 		return;
 	}
 }
 
-void m_USART_DataSend(USART_TypeDef* USARTx, uint16_t Data){
+void m_USART_byteSend(USART_TypeDef* USARTx, uint16_t Data){
 	USART_SendData(USARTx, Data);
-	while(USART_GetITStatus(USARTx, USART_IT_TXE) == SET);
-}
-
-void USART2_IRQHandler(void){
-	if (USART_GetITStatus(USART2, USART_IT_RXNE) == SET) {
-		uint16_t data = USART_ReceiveData(USART2);
-		//
-	}
-	USART_ClearITPendingBit(USART2, USART_IT_RXNE);
-}
-
-void USART3_IRQHandler(void){
-	if (USART_GetITStatus(USART3, USART_IT_RXNE) == SET) {
-		uint16_t data = USART_ReceiveData(USART3);
-	}
-	USART_ClearITPendingBit(USART3, USART_IT_RXNE);
+	while(USART_GetFlagStatus(USARTx, USART_FLAG_TXE) == RESET);
 }
 
 void m_buffer_init(char* buffer_){
 	if(buffer_ == NULL){
-		buffer_ = (char*)malloc(sizeof(char) * MAX_LENGTH);
+		buffer_ = (char*)malloc(sizeof(char) * BT_STR_MAX_LENGTH);
 	}
-	memset(buffer_, 0, MAX_LENGTH);
+	memset(buffer_, 0, BT_STR_MAX_LENGTH);
 }

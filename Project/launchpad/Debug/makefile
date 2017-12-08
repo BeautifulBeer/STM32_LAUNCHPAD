@@ -10,6 +10,8 @@ RM := clean
 -include sources.mk
 -include init/subdir.mk
 -include bluetooth/subdir.mk
+-include PWM/subdir.mk
+-include MPR121/subdir.mk
 -include Libraries/STM32F10x_StdPeriph_Driver_v3.5/src/subdir.mk
 -include Libraries/CMSIS/DeviceSupport/Startup/subdir.mk
 -include Libraries/CMSIS/DeviceSupport/subdir.mk
@@ -26,10 +28,10 @@ RM := clean
 all: launchpad.axf
 
 # Tool invocations
-launchpad.axf: $(OBJS) C:\Users\hw_3\Desktop\git_repository\Project\launchpad\stm32-test.sct $(USER_OBJS) $(LIBS)
+launchpad.axf: $(OBJS) C:\Users\hw_9\Desktop\git_repository\Project\launchpad\stm32-test.sct $(USER_OBJS) $(LIBS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: ARM Linker 5'
-	armlink --entry=main --cpu=cortex-m3 --scatter="C:\Users\hw_3\Desktop\git_repository\Project\launchpad\stm32-test.sct" --info=sizes -o "launchpad.axf" $(OBJS) $(USER_OBJS) $(LIBS)
+	armlink --entry=main --cpu=cortex-m3 --scatter="C:\Users\hw_9\Desktop\git_repository\Project\launchpad\stm32-test.sct" --info=sizes -o "launchpad.axf" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 

@@ -1,0 +1,126 @@
+/*
+ * config_bluetooth.c
+ *
+ *  Created on: 2017. 11. 24.
+ *      Author: hw_3
+ */
+
+#include "config_bluetooth.h"
+
+
+void m_Init_BT_USART1(void){
+	USART_DeInit(USART1);
+	m_Init_BT_USART(USART1);
+	USART_Cmd(USART1, ENABLE);
+	USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);
+}
+
+void m_Init_BT_USART2(void){
+	USART_DeInit(USART2);
+	m_Init_BT_USART(USART2);
+	USART_Cmd(USART2, ENABLE);
+	USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);
+}
+
+void m_Init_BT_USART(USART_TypeDef* USARTx){
+	USART_InitTypeDef usart_init_;
+	//bps = baud rate * wordlength -- 9600bps under the configuration
+	usart_init_.USART_BaudRate = 9600;
+	usart_init_.USART_WordLength = USART_WordLength_8b;
+	usart_init_.USART_StopBits = USART_StopBits_1;
+	usart_init_.USART_Parity = USART_Parity_No;
+	usart_init_.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
+	usart_init_.USART_Mode = USART_Mode_Tx | USART_Mode_Rx;
+	USART_Init(USARTx, &usart_init_);
+}
+
+void m_Init_BT_USART1_GPIOA(void){
+	GPIO_InitTypeDef gpio_init_;
+	//Tx configuration
+	gpio_init_.GPIO_Pin = GPIO_Pin_9;
+	gpio_init_.GPIO_Mode = GPIO_Mode_AF_PP;
+	gpio_init_.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_Init(GPIOA, &gpio_init_);
+	//Rx configuration
+	gpio_init_.GPIO_Pin = GPIO_Pin_10;
+	gpio_init_.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+	GPIO_Init(GPIOA, &gpio_init_);
+}
+
+void m_Init_BT_USART2_GPIOA(void){
+	GPIO_InitTypeDef gpio_init_;
+	//Tx configuration
+	gpio_init_.GPIO_Pin = GPIO_Pin_2;
+	gpio_init_.GPIO_Mode = GPIO_Mode_AF_PP;
+	gpio_init_.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_Init(GPIOA, &gpio_init_);
+	//Rx configuration
+	gpio_init_.GPIO_Pin = GPIO_Pin_3;
+	gpio_init_.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+	GPIO_Init(GPIOA, &gpio_init_);
+}
+
+
+void m_Init_BT_USART2_EXIT(void){
+	EXTI_InitTypeDef exti_init_;
+	//EXTI line configuration
+	GPIO_EXTILineConfig(GPIO_PortSourceGPIOA, GPIO_PinSource3);
+	//Rx Interrupt
+	exti_init_.EXTI_Line = EXTI_Line3;
+	exti_init_.EXTI_LineCmd = ENABLE;
+	exti_init_.EXTI_Mode = EXTI_Mode_Interrupt;
+	exti_init_.EXTI_Trigger = EXTI_Trigger_Rising_Falling;
+	EXTI_Init(&exti_init_);
+}
+
+void m_Init_BT_USART1_EXIT(void){
+	EXTI_InitTypeDef exti_init_;
+	//EXTI line configuration
+	GPIO_EXTILineConfig(GPIO_PortSourceGPIOA, GPIO_PinSource10);
+	//Rx Interrupt
+	exti_init_.EXTI_Line = EXTI_Line10;
+	exti_init_.EXTI_LineCmd = ENABLE;
+	exti_init_.EXTI_Mode = EXTI_Mode_Interrupt;
+	exti_init_.EXTI_Trigger = EXTI_Trigger_Rising_Falling;
+	EXTI_Init(&exti_init_);
+}
+
+void m_USART_DataSend(USART_TypeDef* USARTx, char* str, char buffer_[BT_STR_MAX_LENGTH]){
+	int i;
+	if(str != NULL && strlen(str) <= BT_STR_MAX_LENGTH ){
+		m_buffer_init(buffer_);
+		memcpy(buffer_, str, strlen(str) + 1);
+		m_USART_byteSend(USARTx, BD);
+		m_USART_byteSend(USARTx, BD);
+		m_USART_byteSend(USARTx, CR);
+		m_USART_byteSend(USARTx, LF);
+		m_USART_byteSend(USARTx, SD);
+		for(i=0; i<BT_STR_MAX_LENGTH; i++){
+			if(buffer_[i] != NULL){
+				m_USART_DataSend(USARTx, buffer_[i]);
+			}else{
+				break;
+			}
+		}
+		m_USART_byteSend(USARTx, ED);
+		m_USART_byteSend(USARTx, LF);
+		m_USART_byteSend(USARTx, CR);
+		m_USART_byteSend(USARTx, BD);
+		m_USART_byteSend(USARTx, BD);
+	}else{
+		//Violate function condition
+		return;
+	}
+}
+
+void m_USART_byteSend(USART_TypeDef* USARTx, uint16_t Data){
+	USART_SendData(USARTx, Data);
+	while(USART_GetFlagStatus(USARTx, USART_FLAG_TXE) == RESET);
+}
+
+void m_buffer_init(char* buffer_){
+	if(buffer_ == NULL){
+		buffer_ = (char*)malloc(sizeof(char) * BT_STR_MAX_LENGTH);
+	}
+	memset(buffer_, 0, BT_STR_MAX_LENGTH);
+}

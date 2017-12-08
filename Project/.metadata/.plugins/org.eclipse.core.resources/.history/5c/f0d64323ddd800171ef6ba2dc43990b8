@@ -1,0 +1,15 @@
+/*
+ * config_exti.c
+ *
+ *  Created on: 2017. 12. 4.
+ *      Author: hw_3
+ */
+
+void m_EXTI_GPIO_Interrupt(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin){
+	EXTI_InitTypeDef exti_;
+
+	exti_.EXTI_Line =;
+	exti_.EXTI_LineCmd =;
+	exti_.EXTI_Mode = ;
+	exti_.EXTI_Trigger =;
+}

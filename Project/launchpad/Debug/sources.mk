@@ -21,6 +21,8 @@ SUBDIRS := \
 . \
 init \
 bluetooth \
+PWM \
+MPR121 \
 Libraries \
 Libraries/STM32F10x_StdPeriph_Driver_v3.5/src \
 Libraries/CMSIS/DeviceSupport \

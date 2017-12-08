@@ -15,41 +15,59 @@
 #include <string.h>
 #include <stdlib.h>
 
-#define MAX_LENGTH	512
+#define BT_STR_MAX_LENGTH  512
 
 /*
  *
  * This code implements bluetooth data transmission with android
  *
- * USART3(PC10 - TX, PC11 - RX), USART2(PA2 - TX, PA3 - RX) is used
+ * USART1(PA09 - TX, PA10 - RX), USART2(PA2 - TX, PA3 - RX) is used
+ *
+ * ATCommand List
+ *
+ * AT+BTSCAN
  *
  */
 
+/*
+ * Data transmission Protocol
+ *
+ * BD + BD + CR + LF + Data length
+ * 	SD
+ * 		{DATA} - String, Max length : 512
+ * 	ED
+ * LF + CR + BD + BD
+ */
+
+#define CR 0x0D //Carriage return
+#define LF 0x0A //Line feed
+#define BD 0xFF //Boundary
+#define SD 0xDF //Data Start
+#define ED 0xCF //Data End
+
+
 //Initialize bluetooth configuration for transmission
 void m_Init_Bluetooth(void);
-//Initialize all configuration for usart3 transmission including clock enable
-void m_Init_BT_USART3(void);
+//Initialize all configuration for usart1 transmission including clock enable
+void m_Init_BT_USART1(void);
 //Initialize all configuration for usart2 transmission including clock enable
 void m_Init_BT_USART2(void);
-//Initialize GPIOC configuration for USART3
-void m_Init_BT_USART3_GPIOC(void);
+//Initialize GPIOC configuration for USART1
+void m_Init_BT_USART1_GPIOA(void);
 //Initialize GPIOA configuration for USART2
 void m_Init_BT_USART2_GPIOA(void);
 //Initialize External Interrupt configuration for bluetooth
 void m_Init_BT_USART2_EXIT(void);
 //Initialize External Interrupt configuration for bluetooth
-void m_Init_BT_USART3_EXIT(void);
+void m_Init_BT_USART1_EXIT(void);
 //Initialize USART configuration for bluetooth
 void m_Init_BT_USART(USART_TypeDef* USARTx);
-//Interrupt Handler for USART2
-void USART2_IRQHandler(void);
-//Interrupt Handler for USART3
-void USART3_IRQHandler(void);
 //USART send string data until encounter \n (Maximum length is 512bytes)
-void m_USART_StringSend(USART_TypeDef* USARTx, char* str, char buffer_[MAX_LENGTH] );
+void m_USART_DataSend(USART_TypeDef* USARTx, char* str, char buffer_[BT_STR_MAX_LENGTH] );
 //USART send 2bytes including Synchronization
-void m_USART_DataSend(USART_TypeDef* USARTx, uint16_t Data);
+void m_USART_byteSend(USART_TypeDef* USARTx, uint16_t Data);
 //Buffer Initialization
 void m_buffer_init(char* buffer_);
+
 
 #endif /* CONFIG_BLUETOOTH_H_ */

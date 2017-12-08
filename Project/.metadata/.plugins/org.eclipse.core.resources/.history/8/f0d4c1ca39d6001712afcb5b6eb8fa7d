@@ -1,0 +1,57 @@
+/*
+ * main.c
+ *
+ *  Created on: 2017. 11. 24.
+ *      Author: hw_3
+ */
+#include "bluetooth/config_bluetooth.h"
+#include "init/config_system.h"
+#include "init/config_nvic.h"
+#include <lcd.h>
+#include <touch.h>
+
+
+void USART2_IRQHandler(void){
+	if (USART_GetITStatus(USART2, USART_IT_RXNE) == SET) {
+		uint16_t data = USART_ReceiveData(USART2);
+		m_USART_DataSend(USART1, data);
+	}
+	USART_ClearITPendingBit(USART2, USART_IT_RXNE);
+}
+
+void USART1_IRQHandler(void){
+	if (USART_GetITStatus(USART1, USART_IT_RXNE) == SET) {
+		uint16_t data = USART_ReceiveData(USART3);
+		m_USART_DataSend(USART2, data);
+	}
+	USART_ClearITPendingBit(USART1, USART_IT_RXNE);
+}
+
+
+int main(){
+	char buffer_[BT_STR_MAX_LENGTH];
+	m_buffer_init(buffer_);
+	//System Configuration Initialization
+	m_System_Clock();
+
+	//USARTx
+	m_Init_USART2_Clock();
+	m_Init_USART1_Clock();
+
+	//GPIOx
+	m_Init_GPIOA_Clock();
+
+	//Interrupt Configuration - NVIC
+	m_Init_USART2_NVIC();
+	m_Init_USART1_NVIC();
+
+	//Interrupt Configuration - EXTI
+	m_Init_BT_USART2_EXIT();
+	m_Init_BT_USART1_EXIT();
+
+
+	//Main Loop
+	while(1){
+
+	}
+}

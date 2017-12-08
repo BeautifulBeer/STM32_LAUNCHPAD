@@ -15,15 +15,43 @@ uint16_t DeviceCode;
 
 
 
+
+//CS : PC6 , RS : PD13, RD : PD15, WR : PD14
+/*
+ * LCD_Reg encoding : 0x0000 1(CS)1(RS)1(RD)1(WR)
+ *
+ * Write
+ * CS : 0 / RS : 1 / WR : 0->1
+ *
+ * Read
+ * CS : 0 / RS : 1 / RD : 0->1
+ */
 void LCD_WR_REG(uint16_t LCD_Reg)
 {
-	//코드 작성
+	GPIO_SetBits(GPIOD, GPIO_Pin_15); // RD : 1
+	GPIO_ResetBits(GPIOD, GPIO_Pin_13); // RS : 0
+	GPIO_ResetBits(GPIOC, GPIO_Pin_6); // CS : 0
+	GPIO_ResetBits(GPIOD, GPIO_Pin_14); // WR : 0
+
+	DataToWrite(LCD_Reg);
+
+	GPIO_SetBits(GPIOC, GPIO_Pin_6); // CS : 1
+	GPIO_SetBits(GPIOD, GPIO_Pin_14); // WR : 1
 }
 
+//GPIOE 0~15
 void LCD_WR_DATA(uint16_t LCD_Data)
 {
-	//코드작성
-} 
+	GPIO_SetBits(GPIOD, GPIO_Pin_15); // RD : 1
+	GPIO_SetBits(GPIOD, GPIO_Pin_13); // RS : 1
+	GPIO_ResetBits(GPIOC, GPIO_Pin_6); // CS : 0
+	GPIO_ResetBits(GPIOD, GPIO_Pin_14); // WR : 0
+
+	DataToWrite(LCD_Data);
+
+	GPIO_SetBits(GPIOC, GPIO_Pin_6); // CS : 1
+	GPIO_SetBits(GPIOD, GPIO_Pin_14); // WR : 1
+}
 
 
 /* LCD ReadReg */
@@ -33,7 +61,7 @@ uint16_t LCD_ReadReg(uint16_t LCD_Reg)
 	GPIOF->CRL=0x88888888;
 	GPIOF->CRH=0x88888888;
 
-	//코드 작성
+	// �붾� �묒�
 
 	//////////////////////////////
 	GPIOF->CRL=0x33333333;
@@ -106,7 +134,7 @@ void LCD_DrawPoint(uint16_t xsta, uint16_t ysta)
 {
 	LCD_SetCursor(xsta,ysta);
 	LCD_WR_REG(0x22);           
-	LCD_WR_DATA(POINT_COLOR); 
+	LCD_WR_DATA(POINT_COLOR);
 }
 
 /**					
@@ -450,7 +478,7 @@ void LCD_DrawPicture(u16 StartX,u16 StartY,u16 Xend,u16 Yend,u8 *pic)
 
 void LCD_Configuration(void)
 {
-	/* LCD 관련 GPIO 설정 */
+	/* LCD �� GPIO �ㅼ */
 	GPIO_InitTypeDef GPIO_InitStructure;
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC | RCC_APB2Periph_GPIOD
 			|RCC_APB2Periph_GPIOE, ENABLE);
@@ -495,7 +523,7 @@ void LCD_Init(void)
 {
 	LCD_Configuration();
 
-	/* Delay_10ms() 함수 구현*/
+	/* Delay_10ms() �⑥ �ы쁽*/
 	Delay_10ms(10); /* delay 100 ms */ 
 	Delay_10ms(10); /* delay 100 ms */
 	DeviceCode = LCD_ReadReg(0x0000);
@@ -544,5 +572,4 @@ void LCD_Init(void)
 	Delay_10ms(5);	     
 	LCD_Clear(BLACK);
 }
-
 
