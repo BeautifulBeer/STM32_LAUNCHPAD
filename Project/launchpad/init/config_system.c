@@ -11,7 +11,7 @@ void m_Init_GPIO_Clock(GPIO_TypeDef* GPIOx){
 	if(GPIOx == GPIOA){
 		RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA,ENABLE);
 	}else if(GPIOx == GPIOB){
-		RCC_APB1PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
+		RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
 	}else if(GPIOx == GPIOC){
 		RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC,ENABLE);
 	}else if(GPIOx == GPIOD){
@@ -29,8 +29,12 @@ void m_Init_USART1_Clock(void){
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1,ENABLE);
 }
 
-void m_Init_I2C_Clock(void){
-	RCC_APB2PeriphClockCmd(RCC_APB1Periph_I2C1, ENABLE);
+void m_Init_I2C_Clock(I2C_TypeDef* I2Cx){
+	if(I2Cx == I2C1){
+		RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C1, ENABLE);
+	}else if(I2Cx == I2C2){
+		RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C2, ENABLE);
+	}
 }
 
 void m_System_Clock(void){

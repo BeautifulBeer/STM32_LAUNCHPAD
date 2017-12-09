@@ -23,8 +23,8 @@
 void m_Init_USART2_NVIC(void);
 //Initialize nested vectored interrupt controller configuration for USART3, bluetooth
 void m_Init_USART1_NVIC(void);
-//Initialize nested vectored interrupt controller configuration for I2C1, MPR121
-void m_Init_MPR121_NVIC(void);
+//Initialize nested vectored interrupt controller configuration for I2C1 - flag : 1 = Event Interrupt / flag : 0 = Error Interrupt
+void m_Init_I2C_NVIC(I2C_TypeDef* I2Cx, uint8_t flag);
 //Initialize nested vectored interrupt controller configuration for TIMx
 void m_Init_TIM_NVIC(TIM_TypeDef* TIMx);
 

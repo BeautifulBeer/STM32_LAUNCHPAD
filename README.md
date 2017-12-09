@@ -10,7 +10,7 @@ System Clock = 72MHz
 
 ## Port Specification
 ### PE0, PB6, PB7 - MPR121
-### PB8 - NeoPixel
+### PA7 - NeoPixel
 ### PA2, PA3 - Bluetooth
 ### * Bluetooth Module - Used Model : FB755AC
 - Putty Commnad Line - STM32(Board) Data transmission : USART1
