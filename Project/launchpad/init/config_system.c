@@ -7,20 +7,18 @@
 
 #include "config_system.h"
 
-void m_Init_GPIOA_Clock(void){
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA,ENABLE);
-}
-
-void m_Init_GPIOB_Clock(void){
-	RCC_APB1PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
-}
-
-void m_Init_GPIOC_Clock(void){
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC,ENABLE);
-}
-
-void m_Init_GPIOE_Clock(void){
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOE,ENABLE);
+void m_Init_GPIO_Clock(GPIO_TypeDef* GPIOx){
+	if(GPIOx == GPIOA){
+		RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA,ENABLE);
+	}else if(GPIOx == GPIOB){
+		RCC_APB1PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
+	}else if(GPIOx == GPIOC){
+		RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC,ENABLE);
+	}else if(GPIOx == GPIOD){
+		RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOD,ENABLE);
+	}else if(GPIOx == GPIOE){
+		RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOE,ENABLE);
+	}
 }
 
 void m_Init_USART2_Clock(void){
@@ -89,15 +87,19 @@ void m_Init_AFIO_Clock(void){
 void m_MCO_Enable(void){
 	RCC_MCOConfig(RCC_MCO_SYSCLK);
 }
-
-void m_Init_TIM2_Clock(void){
-	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
+void m_Init_TIM_Clock(TIM_TypeDef* TIMx){
+	if(TIMx == TIM1){
+		RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1, ENABLE);
+	}else if(TIMx == TIM2){
+		RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
+	}else if(TIMx == TIM3){
+		RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
+	}else if(TIMx == TIM4){
+		RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM4, ENABLE);
+	}else if(TIMx == TIM5){
+		RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM5, ENABLE);
+	}
 }
-
-void m_Init_TIM4_Clock(void){
-	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM4, ENABLE);
-}
-
 void SetSysClock(void) //40MHz
 {
    volatile int StartUpCounter = 0, HSEStatus = 0;

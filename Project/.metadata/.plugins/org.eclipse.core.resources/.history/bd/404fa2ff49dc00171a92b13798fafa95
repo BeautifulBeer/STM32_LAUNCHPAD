@@ -1,0 +1,130 @@
+/*
+ * config_pwm.c
+ *
+ *  Created on: 2017. 12. 5.
+ *      Author: hw_3
+ */
+
+#include "config_pwm.h"
+
+//100%, 75% 50% 25%
+void m_Init_PWM_TIM(TIM_TypeDef* TIMx, uint8_t ch1_enable, uint8_t ch2_enable,
+		uint8_t ch3_enable, uint8_t ch4_enable){
+	TIM_OCInitTypeDef time_oc_;
+	//CH1: Duty100
+	if(ch1_enable){
+		time_oc_.TIM_OCMode = TIM_OCMode_PWM1;
+		time_oc_.TIM_OutputState = TIM_OutputState_Enable;
+		time_oc_.TIM_OCPolarity = TIM_OCPolarity_High;
+		time_oc_.TIM_Pulse = 47;
+		TIM_OC1Init(TIMx, &time_oc_);
+		TIM_OC1PreloadConfig(TIMx, TIM_OCPreload_Enable);
+	}
+	//CH1: Duty75
+	if(ch2_enable){
+		time_oc_.TIM_OutputState = TIM_OutputState_Enable;
+		time_oc_.TIM_Pulse = 35;
+		TIM_OC2Init(TIMx, &time_oc_);
+		TIM_OC2PreloadConfig(TIMx, TIM_OCPreload_Enable);
+	}
+	//CH1: Duty50
+	if(ch3_enable){
+		time_oc_.TIM_OutputState = TIM_OutputState_Enable;
+		time_oc_.TIM_Pulse = 23;
+		TIM_OC3Init(TIMx, &time_oc_);
+		TIM_OC3PreloadConfig(TIMx, TIM_OCPreload_Enable);
+	}
+	//CH1: Duty25
+	if(ch3_enable){
+		time_oc_.TIM_OutputState = TIM_OutputState_Enable;
+		time_oc_.TIM_Pulse = DUTY_25;
+		TIM_OC4Init(TIMx, &time_oc_);
+		TIM_OC4PreloadConfig(TIMx, TIM_OCPreload_Enable);
+	}
+}
+
+void m_Init_PWM_GPIO(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pinx, uint8_t flag){
+	GPIO_InitTypeDef gpio_init_;
+	gpio_init_.GPIO_Pin = GPIO_Pinx;
+	if(flag){
+		gpio_init_.GPIO_Mode = GPIO_Mode_AF_PP;
+	}else{
+		gpio_init_.GPIO_Mode = GPIO_Mode_Out_PP;
+	}
+	gpio_init_.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_Init(GPIOx, &gpio_init_);
+}
+
+void m_Init_TIM(TIM_TypeDef* TIMx, int Period, int Prescalar){
+	TIM_TimeBaseInitTypeDef time_;
+	//time_.TIM_Period = Period;
+	time_.TIM_Period = 47;
+	//time_.TIM_Prescaler = Prescalar;
+	time_.TIM_Prescaler = 0;
+	time_.TIM_ClockDivision = TIM_CKD_DIV1;
+	time_.TIM_CounterMode = TIM_CounterMode_Up;
+	TIM_TimeBaseInit(TIMx, &time_);
+	TIM_ARRPreloadConfig(TIMx, ENABLE);
+	TIM_Cmd(TIMx, ENABLE);
+}
+
+/*void m_delay(int* tim_it_flag, int delay_time){
+	while(delay_time--){
+		*tim_it_flag = 0;
+		while(!(*tim_it_flag));
+	}
+}*/
+
+void m_delay(int* tim_it_flag, int delay_time){
+	int delay = delay_time;
+	while(delay--);
+
+}
+
+void m_send_reset(int* tim_it_flag){
+	GPIO_ResetBits(GPIOB,GPIO_Pin_10);
+	GPIO_ResetBits(GPIOD,GPIO_Pin_7);
+	m_delay(tim_it_flag, RESET_CODE);
+}
+
+void m_send_bit(int* tim_it_flag, uint8_t bit){
+	//1 bit
+	if(bit){
+		GPIO_SetBits(GPIOB,GPIO_Pin_10);
+		GPIO_SetBits(GPIOD,GPIO_Pin_7);
+		m_delay(tim_it_flag, NEO_T1H);
+		GPIO_ResetBits(GPIOB,GPIO_Pin_10);
+		GPIO_ResetBits(GPIOD,GPIO_Pin_7);
+		m_delay(tim_it_flag, NEO_T1L);
+	//0 bit
+	}else{
+		GPIO_SetBits(GPIOB,GPIO_Pin_10);
+		GPIO_SetBits(GPIOD,GPIO_Pin_7);
+		m_delay(tim_it_flag, NEO_T0H);
+		GPIO_ResetBits(GPIOB,GPIO_Pin_10);
+		GPIO_ResetBits(GPIOD,GPIO_Pin_7);
+		m_delay(tim_it_flag, NEO_T0L);
+	}
+}
+
+void m_send_rgb(int* tim_it_flag, uint8_t red, uint8_t green, uint8_t blue){
+	int i;
+	for(i=7; i>=0; i--){
+		m_send_bit(tim_it_flag, red & _BV(i));
+	}
+	for(i=7; i>=0; i--){
+		m_send_bit(tim_it_flag, green & _BV(i));
+	}
+	for(i=7; i>=0; i--){
+		m_send_bit(tim_it_flag, blue & _BV(i));
+	}
+}
+
+void m_send_pixel_data(int* tim_it_flag, uint8_t pixel_data[CONST_PIXEL_NUM][CONST_RGB_NUM]){
+	int i;
+	for(i=0; i<CONST_PIXEL_NUM; i++){
+		m_send_rgb(tim_it_flag, pixel_data[i][0], pixel_data[i][1], pixel_data[i][2]);
+	}
+	m_send_reset(tim_it_flag);
+}
+
