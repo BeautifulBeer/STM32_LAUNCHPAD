@@ -7,14 +7,44 @@
 
 #include "config_lcd.h"
 
-
-void Music_background() {
+void loading_TFT(uint16_t data[][TFT_BACKGROUND_WIDTH]){
+	int i,j,k;
 	LCD_Clear(WHITE);
-	LCD_DrawLine(72, 0, 72, 320);
+	for(i=0; i<TFT_BACKGROUND_HEIGHT; i++){
+		for(j=0; j<TFT_BACKGROUND_WIDTH; j++){
+			for (k = 15; k >= 0; k--) {
+				if (data[i][TFT_BACKGROUND_WIDTH-1-j] & _BV(k)) {
+					LCD_DrawPoint(240-(TFT_BACKGROUND_BASE_XPOS + j * 16 + k),
+							TFT_BACKGROUND_BASE_YPOS + i);
+				}
+			}
+		}
+	}
+}
+
+void printTreble(int pos_x, int pos_y, uint16_t data[][CONST_TREBLE_COL]){
+	int i,j,k;
+	for(i=0; i<CONST_TREBLE_ROW; i++){
+		for(j=0; j<CONST_TREBLE_COL; j++){
+			for (k = 0; k < 16; k++) {
+				if (data[i][1-j] & _BV(k)) {
+					LCD_DrawPoint(pos_x + i,
+							pos_y + j * 16 + k);
+				}
+			}
+		}
+	}
+}
+
+void Music_background(uint16_t* SPEAKER, uint16_t TREBLE[][CONST_TREBLE_COL]) {
+	LCD_Clear(WHITE);
 	LCD_DrawLine(84, 0, 84, 320);
 	LCD_DrawLine(96, 0, 96, 320);
 	LCD_DrawLine(108, 0, 108, 320);
 	LCD_DrawLine(120, 0, 120, 320);
+	LCD_DrawLine(132, 0, 132, 320);
+	printTreble(68, 270, TREBLE);
+	printObject(30, 300, SPEAKER);
 }
 
 void removeObject(uint16_t x_pos, uint16_t y_pos, const uint16_t* obj) {
@@ -71,4 +101,15 @@ void printVolume(uint8_t cur_volume, uint8_t last_volume, uint8_t up_down){
 		}
 
 	}
+}
+
+void m_Init_LCD_TIM(TIM_TypeDef* TIMx){
+	TIM_TimeBaseInitTypeDef time_;
+	time_.TIM_Period = LCD_TIM_PERIOD;
+	time_.TIM_Prescaler = LCD_TIM_PESCALAR;
+	time_.TIM_ClockDivision = TIM_CKD_DIV1;
+	time_.TIM_CounterMode = TIM_CounterMode_Up;
+	TIM_TimeBaseInit(TIMx, &time_);
+	TIM_Cmd(TIMx, ENABLE);
+	TIM_ITConfig(TIMx, TIM_IT_Update, ENABLE);
 }

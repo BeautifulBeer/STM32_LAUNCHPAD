@@ -29,9 +29,12 @@
 #define BIT_0						DUTY_25
 #define RESET						DUTY_0
 
+#define CONST_PATTERN_NUM 			8
 #define CONST_PIXEL_NUM 			8
 #define CONST_RGB_NUM				3
 #define CONST_RESET_PERIOD			67 // 80us / 1.2us
+#define LED_TIM_PERIOD				500
+#define LED_TIM_PESCALAR			20000
 
 
 
@@ -40,7 +43,7 @@ void m_Init_PWM_TIM(TIM_TypeDef* TIMx, uint8_t ch1_enable, uint8_t ch2_enable,
 //flag : 0 - Output Mode , flag : 1 - Alternative Output Mode
 void m_Init_PWM_GPIO(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pinx, uint8_t flag);
 void m_Init_TIM(TIM_TypeDef* TIMx, int Period, int Prescalar);
-
+void m_Init_LED_TIM(TIM_TypeDef* TIMx);
 //NeoPixel Data Send
 void m_send_BIT(TIM_TypeDef* TIMx, uint16_t TIM_Channel, uint8_t bit);
 

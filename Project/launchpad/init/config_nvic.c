@@ -46,7 +46,7 @@ void m_Init_I2C_NVIC(I2C_TypeDef* I2Cx, uint8_t flag){
   NVIC_Init(&nvic_init_);
 }
 
-void m_Init_TIM_NVIC(TIM_TypeDef* TIMx){
+void m_Init_TIM_NVIC(TIM_TypeDef* TIMx, uint32_t Priority){
 	NVIC_InitTypeDef nvic_init_;
 	if(TIMx == TIM1){
 		//Default Update Interrupt
@@ -60,7 +60,7 @@ void m_Init_TIM_NVIC(TIM_TypeDef* TIMx){
 	}else if(TIMx == TIM5){
 		nvic_init_.NVIC_IRQChannel = TIM5_IRQn;
 	}
-	nvic_init_.NVIC_IRQChannelPreemptionPriority = 0;
+	nvic_init_.NVIC_IRQChannelPreemptionPriority = Priority;
 	nvic_init_.NVIC_IRQChannelSubPriority = 0;
 	nvic_init_.NVIC_IRQChannelCmd = ENABLE;
 	NVIC_Init(&nvic_init_);

@@ -20,7 +20,7 @@ void m_Init_PWM_TIM(TIM_TypeDef* TIMx, uint8_t ch1_enable, uint8_t ch2_enable,
 		TIM_OC1Init(TIMx, &time_oc_);
 		TIM_OC1PreloadConfig(TIMx, TIM_OCPreload_Enable);
 	}
-	//CH2: Duty75
+	//CH2: Duty50
 	if(ch2_enable){
 		time_oc_.TIM_OutputState = TIM_OutputState_Enable;
 		time_oc_.TIM_Pulse = 23;
@@ -85,4 +85,15 @@ void m_send_BIT(TIM_TypeDef* TIMx, uint16_t TIM_Channel, uint8_t bit){
 	}else if(TIM_Channel == TIM_Channel_4){
 		TIM_SetCompare4(TIMx, cc);
 	}
+}
+
+void m_Init_LED_TIM(TIM_TypeDef* TIMx){
+	TIM_TimeBaseInitTypeDef time_;
+	time_.TIM_Period = LED_TIM_PERIOD;
+	time_.TIM_Prescaler = LED_TIM_PESCALAR;
+	time_.TIM_ClockDivision = TIM_CKD_DIV1;
+	time_.TIM_CounterMode = TIM_CounterMode_Up;
+	TIM_TimeBaseInit(TIMx, &time_);
+	TIM_Cmd(TIMx, ENABLE);
+	TIM_ITConfig(TIMx, TIM_IT_Update, ENABLE);
 }
