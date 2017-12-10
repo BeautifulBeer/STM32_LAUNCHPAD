@@ -27,7 +27,7 @@ void m_Init_USART2_Clock(void);
 //Enable USART1
 void m_Init_USART1_Clock(void);
 //Enable I2c1
-void m_Init_I2C_Clock(void);
+void m_Init_I2C_Clock(I2C_TypeDef* I2Cx);
 //Setting System clock to predefined - 8MHz
 void m_System_Clock(void);
 //Use MCO as System clock

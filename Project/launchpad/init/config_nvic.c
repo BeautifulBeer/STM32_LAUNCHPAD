@@ -25,9 +25,21 @@ void m_Init_USART1_NVIC(void){
 	NVIC_Init(&nvic_init_);
 }
 
-void m_Init_MPR121_NVIC(void) {
+void m_Init_I2C_NVIC(I2C_TypeDef* I2Cx, uint8_t flag){
   NVIC_InitTypeDef nvic_init_;
-  nvic_init_.NVIC_IRQChannel = I2C1_ER_IRQn;
+  if(I2Cx == I2C1){
+	  if(flag){
+		  nvic_init_.NVIC_IRQChannel = I2C1_EV_IRQn;
+	  }else{
+		  nvic_init_.NVIC_IRQChannel = I2C1_ER_IRQn;
+	  }
+  }else if(I2Cx == I2C2){
+	  if(flag){
+		  nvic_init_.NVIC_IRQChannel = I2C2_EV_IRQn;
+	  }else{
+		  nvic_init_.NVIC_IRQChannel = I2C2_ER_IRQn;
+	  }
+  }
   nvic_init_.NVIC_IRQChannelPreemptionPriority = 0;
   nvic_init_.NVIC_IRQChannelSubPriority = 1;
   nvic_init_.NVIC_IRQChannelCmd = ENABLE;

@@ -57,10 +57,8 @@ void m_Init_PWM_GPIO(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pinx, uint8_t flag){
 
 void m_Init_TIM(TIM_TypeDef* TIMx, int Period, int Prescalar){
 	TIM_TimeBaseInitTypeDef time_;
-	//time_.TIM_Period = Period;
-	time_.TIM_Period = 47;
-	//time_.TIM_Prescaler = Prescalar;
-	time_.TIM_Prescaler = 0;
+	time_.TIM_Period = Period;
+	time_.TIM_Prescaler = Prescalar;
 	time_.TIM_ClockDivision = TIM_CKD_DIV1;
 	time_.TIM_CounterMode = TIM_CounterMode_Up;
 	TIM_TimeBaseInit(TIMx, &time_);
