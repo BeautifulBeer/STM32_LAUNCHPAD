@@ -1,41 +1,49 @@
 package com.ykw.bluetoothapp.bluetooth;
 
-import android.annotation.TargetApi;
-import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.os.Build;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.TextView;
 import android.widget.Toast;
 
+import com.ykw.bluetoothapp.MusicPlay.MediaPlayerManager;
+import com.ykw.bluetoothapp.MusicPlay.MusicResourceManager;
+import com.ykw.bluetoothapp.MusicPlay.SoundsPoolManager;
 import com.ykw.bluetoothapp.R;
 
-import java.util.ArrayList;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 import static android.support.v4.content.PermissionChecker.PERMISSION_GRANTED;
+import static com.ykw.bluetoothapp.bluetooth.BluetoothState.CARRAIGE_RETURN;
 import static com.ykw.bluetoothapp.bluetooth.BluetoothState.DEVICE_NAME;
 import static com.ykw.bluetoothapp.bluetooth.BluetoothState.EXTRA_DEVICE_ADDRESS;
+import static com.ykw.bluetoothapp.bluetooth.BluetoothState.LINE_FEED;
 import static com.ykw.bluetoothapp.bluetooth.BluetoothState.MESSAGE_DEVICE_NAME;
+import static com.ykw.bluetoothapp.bluetooth.BluetoothState.MESSAGE_READ;
 import static com.ykw.bluetoothapp.bluetooth.BluetoothState.MESSAGE_TOAST;
+import static com.ykw.bluetoothapp.bluetooth.BluetoothState.MUSIC_PLAY;
 import static com.ykw.bluetoothapp.bluetooth.BluetoothState.REQUEST_ENABLE_DEVICE;
 import static com.ykw.bluetoothapp.bluetooth.BluetoothState.REQUEST_PERMISSION;
+import static com.ykw.bluetoothapp.bluetooth.BluetoothState.STATE_CONNECTED;
+import static com.ykw.bluetoothapp.bluetooth.BluetoothState.SYSTEM_START;
 import static com.ykw.bluetoothapp.bluetooth.BluetoothState.TOAST;
 
 /**
@@ -46,18 +54,36 @@ public class BluetoothActivity extends AppCompatActivity
     implements BluetoothActivityInterface {
 
     private Button connect_btn_;
-    private Button start_play_btn_;
+    private Button play1_btn_;
     private BluetoothManager manager;
     private Handler handler;
     private BluetoothAdapter mBluetoothAdapter = null;
-
-
+    private MediaPlayerManager mediaPlayerManager;
+    private AudioManager audioManager;
+    private static final int StreamType = AudioManager.STREAM_MUSIC;
+    private static final String TAG = BluetoothActivity.class.getSimpleName();
+    private TimerTask timerTask;
+    private Timer timer;
+    private byte[] requestMusic;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.bluetooth_activity);
         connect_btn_ = (Button)findViewById(R.id.connect_btn);
-        start_play_btn_ = (Button)findViewById(R.id.play_btn);
+        play1_btn_ = (Button)findViewById(R.id.play1_btn);
+        mediaPlayerManager = MediaPlayerManager.getInstance(getApplicationContext());
+        final byte[] requestMusic = new byte[3];
+        requestMusic[0] = MUSIC_PLAY;
+        requestMusic[1] = CARRAIGE_RETURN;
+        requestMusic[2] = LINE_FEED;
+        timerTask = new TimerTask() {
+            @Override
+            public void run() {
+                manager.write(requestMusic);
+            }
+        };
+        timer = new Timer();
+        timer.schedule(timerTask, 3000, 4000);
         handler = new Handler(Looper.getMainLooper()){
             @Override
             public void handleMessage(Message msg) {
@@ -66,11 +92,53 @@ public class BluetoothActivity extends AppCompatActivity
                     setTitle(device_name);
                 }else if(msg.what == MESSAGE_TOAST){
                     Toast.makeText(getApplicationContext(), msg.getData().getString(TOAST),Toast.LENGTH_LONG).show();
+                }else if(msg.what == MESSAGE_READ){
+                    int bytes = msg.arg1;
+                    byte[] buffer = (byte[])msg.obj;
+                    if(buffer == null){
+                        Log.d(TAG, "NULL");
+                    }else{
+                        try {
+                            String data = new String(buffer, 0, bytes, "UTF-8");
+                            if(!data.equals("")){
+                                Log.d(TAG, "DATA : "+data);
+                                if(data.length() >= 3){
+                                    if(data.charAt(0) == 'b'){
+                                        if((data.charAt(1) - '0') == 1){
+                                            mediaPlayerManager.play(2);
+                                        }
+                                        if((data.charAt(2) - '0') == 1){
+                                            mediaPlayerManager.play(3);
+                                        }
+                                }
+                                }else if(data.charAt(0) == 'm'){
+                                    if(data.length() >= 2){
+                                        Log.d(TAG, "dd : " + data.charAt(1));
+                                        mediaPlayerManager.play((data.charAt(1) - '0'));
+                                    }
+                                }else if(data.charAt(0) == 'v'){
+                                    if(data.length() >= 2){
+                                        if((data.charAt(1) - '0') == 1){
+                                            VolumeUP();
+                                        }else if((data.charAt(1) - '0') == 0){
+                                            VolumeDOWN();
+                                        }
+                                    }
+                                }
+                            }
+                        } catch (UnsupportedEncodingException e) {
+                            e.printStackTrace();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
                 }
             }
         };
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         manager = new BluetoothManager(this, handler);
+        VolumeZero();
         enableDiscovering();
         checkPermission();
         connect_btn_.setOnClickListener(new View.OnClickListener() {
@@ -86,10 +154,14 @@ public class BluetoothActivity extends AppCompatActivity
             }
         });
 
-        start_play_btn_.setOnClickListener(new View.OnClickListener() {
+        play1_btn_.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                byte[] buf = new byte[3];
+                buf[0] = SYSTEM_START;
+                buf[1] = CARRAIGE_RETURN;
+                buf[2] = LINE_FEED;
+                manager.write(buf);
             }
         });
     }
@@ -172,4 +244,27 @@ public class BluetoothActivity extends AppCompatActivity
         BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(address);
         manager.ConnectDevice(device, secure);
     }
+
+    public void VolumeZero(){
+        audioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
+        audioManager.setStreamVolume(StreamType, 0, AudioManager.FLAG_PLAY_SOUND);
+    }
+
+    public void VolumeUP(){
+        audioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
+        int currVol = audioManager.getStreamVolume(StreamType);
+        int maxVol = audioManager.getStreamMaxVolume(StreamType);
+        if(currVol < maxVol - 1){
+            audioManager.setStreamVolume(StreamType, currVol +2, AudioManager.FLAG_PLAY_SOUND);
+        }
+    }
+
+    public void VolumeDOWN(){
+        audioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
+        int currVol = audioManager.getStreamVolume(StreamType);
+        if(currVol > 1){
+            audioManager.setStreamVolume(StreamType, currVol -2, AudioManager.FLAG_PLAY_SOUND);
+        }
+    }
 }
+

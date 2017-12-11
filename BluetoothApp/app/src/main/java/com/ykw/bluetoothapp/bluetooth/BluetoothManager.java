@@ -54,12 +54,11 @@ public class BluetoothManager {
     private ConnectedThread connectedThread;
     private AcceptThread secure_acceptThread;
     private AcceptThread in_secure_acceptThread;
-    private static BluetoothHandler handler = new BluetoothHandler();
-    private Handler ui_handler;
+    private Handler handler;
 
     public BluetoothManager(Context context, Handler handler){
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        this.ui_handler = handler;
+        this.handler = handler;
         mState = STATE_NONE;
     }
 
@@ -103,7 +102,7 @@ public class BluetoothManager {
     private synchronized void updateUserInterfaceTitle(){
         mState = getState();
         mNewState = mState;
-        ui_handler.obtainMessage(MESSAGE_STATE_CHANGE, mNewState, -1).sendToTarget();
+        handler.obtainMessage(MESSAGE_STATE_CHANGE, mNewState, -1).sendToTarget();
     }
 
     public synchronized int getState() {
@@ -159,7 +158,13 @@ public class BluetoothManager {
         updateUserInterfaceTitle();
     }
 
-    public synchronized void ConnectDevice(BluetoothDevice device, boolean secure){
+    public void write(byte[] bytes) {
+        if(mState == STATE_CONNECTED){
+            connectedThread.write(bytes);
+        }
+    }
+
+        public synchronized void ConnectDevice(BluetoothDevice device, boolean secure){
         if(mState == STATE_CONNECTING){
             if(connectThread != null){
                 connectThread.cancel();
@@ -200,21 +205,21 @@ public class BluetoothManager {
         connectedThread = new ConnectedThread(socket, socketType);
         connectedThread.start();
 
-        Message msg = ui_handler.obtainMessage(MESSAGE_DEVICE_NAME);
+        Message msg = handler.obtainMessage(MESSAGE_DEVICE_NAME);
         Bundle bundle = new Bundle();
         bundle.putString(DEVICE_NAME, device.getName());
         msg.setData(bundle);
-        ui_handler.sendMessage(msg);
+        handler.sendMessage(msg);
 
         updateUserInterfaceTitle();
     }
 
     private void connectionFailed(){
-        Message msg = ui_handler.obtainMessage(MESSAGE_TOAST);
+        Message msg = handler.obtainMessage(MESSAGE_TOAST);
         Bundle bundle = new Bundle();
         bundle.putString(TOAST, "Unable to connect device");
         msg.setData(bundle);
-        ui_handler.sendMessage(msg);
+        handler.sendMessage(msg);
 
         mState = STATE_NONE;
         updateUserInterfaceTitle();
@@ -222,11 +227,11 @@ public class BluetoothManager {
     }
 
     private void connectionLost(){
-        Message msg = ui_handler.obtainMessage(MESSAGE_TOAST);
+        Message msg = handler.obtainMessage(MESSAGE_TOAST);
         Bundle bundle = new Bundle();
         bundle.putString(TOAST, "Device connection was lost");
         msg.setData(bundle);
-        ui_handler.sendMessage(msg);
+        handler.sendMessage(msg);
 
         mState = STATE_NONE;
         updateUserInterfaceTitle();
@@ -385,13 +390,21 @@ public class BluetoothManager {
         public void run() {
             super.run();
             byte[] buffer = new byte[512];
-            int bytes;
+            int bytes = 0, data;
 
             while(mState == STATE_CONNECTED){
                 try{
-                    bytes = mmInStream.read(buffer);
+                    while((data = mmInStream.read()) != 0x0D){
+                        if(data != 0x0A){
+                            buffer[bytes] = (byte)data;
+                            bytes++;
+                        }
+                    }
+                    //bytes = mmInStream.read(buffer);
+
                     handler.obtainMessage(MESSAGE_READ, bytes, -1, buffer)
                     .sendToTarget();
+                    bytes = 0;
                 } catch (IOException e) {
                     Log.d(TAG, "disconnected", e);
                     connectionLost();

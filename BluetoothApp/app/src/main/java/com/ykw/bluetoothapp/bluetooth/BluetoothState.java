@@ -9,8 +9,10 @@ public interface BluetoothState {
     public static final String SECURE_NAME = "MON_TEAM3_SECURE";
     public static final String INSECURE_NAME = "MON_TEAM3_INSECURE";
     //bluetooth specification 128bit without dashes
-    public static final String SECURE_BT_UUID = "5948296a-bf29-13bb-c594-01dd5ab51025";
-    public static final String INSECURE_BT_UUID = "00544698-051a-b539-d544-a0000a0b5697";
+    public static final String SECURE_BT_UUID = "00001101-0000-1000-8000-00805F9B34FB";
+    public static final String INSECURE_BT_UUID = "00001101-0000-1000-8000-00805F9B34FB";
+//    public static final String SECURE_BT_UUID = "5948296a-bf29-13bb-c594-01dd5ab51025";
+//    public static final String INSECURE_BT_UUID = "00544698-051a-b539-d544-a0000a0b5697";
 
     //Intent State
     public static final int REQUEST_ENABLE_BT = 1;
@@ -34,5 +36,11 @@ public interface BluetoothState {
     public static final int STATE_CONNECTED = 2;
     public static final int STATE_CONNECTING = 3;
     public static final int STATE_LISTEN = 4;
+
+    public static final byte SYSTEM_START = (byte) 0xFA;
+    public static final byte MUSIC_PLAY = (byte) 0xFB;
+    public static final byte CARRAIGE_RETURN = (byte) 0x0D;
+    public static final byte LINE_FEED = (byte) 0x0A;
+
 
 }
