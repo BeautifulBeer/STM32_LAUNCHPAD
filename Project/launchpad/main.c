@@ -20,6 +20,7 @@
 #include "MPR121/config_mpr121.h"
 #include "PWM/config_pwm.h"
 #include "LCD/config_lcd.h"
+#include <string.h>
 
 
 
@@ -30,6 +31,7 @@
  */
 
 uint8_t systemStart_flag;
+uint8_t initalization_flag;
 
 //TFT LCD Variables
 int last_Xposition;
@@ -430,6 +432,7 @@ int Volume_DOWN_EXTI2_flag;
 int Volume_UP_EXTI5_flag;
 
 
+
 //I2C Variables
 uint16_t lasttouched;
 uint16_t currtouched;
@@ -443,31 +446,35 @@ int I2C1_ER_Status;
 int cur_pixel, cur_rgb, cur_pos, cur_reset;
 int cur_pattern_num;
 uint8_t PIXEL_PATTERN_1[CONST_PIXEL_NUM][CONST_RGB_NUM] = {
-		{ 235, 245, 127 }, {13, 134, 178 }, { 56, 200, 155 }, { 15, 40, 113 },
-		{ 175, 100, 35  }, {51, 158, 147 }, { 175, 100, 52 }, { 78, 200, 3  }
+		{ 148, 0, 211 }, {75, 0, 130 }, { 0, 0, 255 }, { 0, 255, 0 },
+		{ 255, 255, 0  }, {255, 127, 0 }, { 255, 0, 0 }, { 255, 255 , 255}
 };
 
 
 //Bluetooth Flag
+int Button_1_EXTI11_flag;
+int Button_2_EXTI12_flag;
+int Button_3_EXTI13_flag;
 uint8_t BLUETOOTH_USART2_flag;
 uint8_t BT_STATUS;
 uint16_t receive_offset;
 uint8_t receive_buffer_[BT_STR_MAX_LENGTH];
 char send_buffer_[BT_STR_MAX_LENGTH];
+char requestMusic[5];
 
-
-//MPR121 IRQ
-void EXTI0_IRQHandler(void) {
-	if (EXTI_GetITStatus(EXTI_Line0) != RESET) {
-		MPR121_IRQ_EXTI0_flag = 1;
-
-		EXTI_ClearITPendingBit(EXTI_Line0);
+void EXTI15_10_IRQHandler(void){
+	if (EXTI_GetITStatus(EXTI_Line11) == SET) {
+		Button_1_EXTI11_flag = 1;
+		EXTI_ClearITPendingBit(EXTI_Line11);
+	}else if(EXTI_GetITStatus(EXTI_Line12) == SET) {
+		Button_2_EXTI12_flag = 1;
+		EXTI_ClearITPendingBit(EXTI_Line12);
 	}
 }
 
 //TFT LCD Volume Up
 void EXTI9_5_IRQHandler(void) { //volume up status
-	if (EXTI_GetITStatus(EXTI_Line5) != RESET) {
+	if (EXTI_GetITStatus(EXTI_Line5) == SET) {
 		Volume_UP_EXTI5_flag = 1;
 		if(cur_volume != CONST_MAX_VOLUME){
 			cur_volume++;
@@ -478,7 +485,7 @@ void EXTI9_5_IRQHandler(void) { //volume up status
 
 //TFT LCD Volume Down
 void EXTI2_IRQHandler(void) { //volume down status
-	if (EXTI_GetITStatus(EXTI_Line2) != RESET) {
+	if (EXTI_GetITStatus(EXTI_Line2) == SET) {
 		Volume_DOWN_EXTI2_flag = 1;
 		if(cur_volume != 0){
 			cur_volume--;
@@ -488,7 +495,7 @@ void EXTI2_IRQHandler(void) { //volume down status
 }
 
 void TIM4_IRQHandler(void){
-	if (TIM_GetITStatus(TIM4, TIM_IT_Update) != RESET) {
+	if (TIM_GetITStatus(TIM4, TIM_IT_Update) == SET) {
 
 		if(cur_pattern_num==8){
 			cur_pattern_num=0;
@@ -502,7 +509,7 @@ void TIM4_IRQHandler(void){
 
 //PWM
 void TIM3_IRQHandler(void) {
-	if (TIM_GetITStatus(TIM3, TIM_IT_CC2) != RESET) {
+	if (TIM_GetITStatus(TIM3, TIM_IT_CC2) == SET) {
 		if (cur_pixel != CONST_PIXEL_NUM) {
 			if (cur_rgb != CONST_RGB_NUM) {
 				if (cur_pos != RGB_BIT_SIZE) {
@@ -535,7 +542,7 @@ void TIM3_IRQHandler(void) {
 
 //TFT LCD Refresher
 void TIM2_IRQHandler(void){
-	if (TIM_GetITStatus(TIM2, TIM_IT_Update) != RESET) {
+	if (TIM_GetITStatus(TIM2, TIM_IT_Update) == SET) {
 		if (cur_Yposition > CONST_TFT_Y) {
 			cur_Yposition = 0;
 		} else {
@@ -547,8 +554,16 @@ void TIM2_IRQHandler(void){
 }
 
 void USART2_IRQHandler(void){
-	if (USART_GetITStatus(USART2, USART_IT_RXNE) != RESET) {
-		uint8_t data = USART_ReceiveData(USART2) & 0xFF;
+	if (USART_GetITStatus(USART2, USART_IT_RXNE) == SET) {
+		uint8_t data = (uint8_t)USART_ReceiveData(USART2);
+		if(data == BT_STATUS_SYSTEM_START){
+			systemStart_flag = 1;
+			initalization_flag = 0;
+			BT_STATUS = BT_STATUS_SYSTEM_START;
+		}
+		if(data == BT_STATUS_MUSIC_PLAY){
+			BT_STATUS = BT_STATUS_MUSIC_PLAY;
+		}
 		if(receive_offset == BT_STR_MAX_LENGTH || data == '\r'){
 			BLUETOOTH_USART2_flag = 1;
 		}else{
@@ -561,7 +576,7 @@ void USART2_IRQHandler(void){
 
 
 void USART1_IRQHandler(void){
-	if (USART_GetITStatus(USART1, USART_IT_RXNE) != RESET) {
+	if (USART_GetITStatus(USART1, USART_IT_RXNE) == SET) {
 		uint16_t data = USART_ReceiveData(USART1);
 		//m_USART_DataSend(USART1, data);
 		m_USART_byteSend(USART2, data);
@@ -614,7 +629,7 @@ int main() {
 	m_Init_GPIO_Clock(GPIOE);
 	m_Init_GPIO_Clock(GPIOD);
 	m_Init_AFIO_Clock(); //for timer
-	m_Init_I2C_Clock(I2C1);
+
 
 	//LED
 	Configure_LED();
@@ -631,86 +646,119 @@ int main() {
 	m_Init_USART2_NVIC();
 	m_Init_USART1_NVIC();
 
-
-	//I2C MPR121
-	// enable I2C ER Interrupt
-/*	m_Init_I2C_NVIC(I2C1, 0);
-	m_Init_MPR121_GPIO(GPIOB, GPIO_Pin_6, 1);
-	m_Init_MPR121_GPIO(GPIOB, GPIO_Pin_7, 1);
-	m_Init_MPR121_GPIO(GPIOE, GPIO_Pin_0, 0);
-	m_Init_MPR121_I2C(I2C1);*/
-	//m_Init_MPR121(I2C_Buffer);
-
-	//TFT-LCD
-	m_EXTI_GPIO_Interrupt(GPIO_PortSourceGPIOC, GPIO_PinSource5, EXTI_Line5,
-			EXTI9_5_IRQn); // volume up
-	m_EXTI_GPIO_Interrupt(GPIO_PortSourceGPIOC, GPIO_PinSource2, EXTI_Line2,
-			EXTI2_IRQn); // volume down
-	m_Init_TIM_Clock(TIM2);
-	m_Init_TIM_NVIC(TIM2,0);
-	m_Init_LCD_TIM(TIM2);
 	LCD_Init();
-	Music_background(SPEAKER, TREBLE);
-
-	m_USART_DataSend(USART2, "AT+BTSCAN\r\n", send_buffer_);
 
 
 	//Timer PWM PA7 Should be selected
-	m_Init_TIM_Clock(TIM3);
-	m_Init_TIM_NVIC(TIM3,1);
-	m_Init_TIM(TIM3, PERIOD, PRESCALAR);
-
-	 m_Init_PWM_GPIO(GPIOA, GPIO_Pin_6, 1);
-	 m_Init_PWM_GPIO(GPIOA, GPIO_Pin_7, 1);
-	 m_Init_PWM_GPIO(GPIOB, GPIO_Pin_0, 1);
-	 m_Init_PWM_GPIO(GPIOB, GPIO_Pin_1, 1);
-
-	 m_Init_PWM_TIM(TIM3, 1, 1, 1, 1);
-
-	 m_Init_TIM_Clock(TIM4);
-	 m_Init_TIM_NVIC(TIM4,0);
-	 m_Init_LED_TIM(TIM4);
 
 
 	//Main Loop
 	while (1) {
 		//Wait for android signal
 		if(!systemStart_flag){
-//			loading_TFT(MUSIC_BACKGROUND);
-//			while(BT_STATUS != BT_STATUS_SYSTEM_UNSTART);
-//			Music_background(SPEAKER, TREBLE);
-//			systemStart_flag = 1;
-		}
-		//m_printState(lasttouched, currtouched, I2C_Buffer);
-		if(MPR121_IRQ_EXTI0_flag) {
-			//Show_LCD_Status();
-			//GPIOD->BSRR = GPIO_BSRR_BS2;
-			m_printState(lasttouched, currtouched, I2C_Buffer);
-			MPR121_IRQ_EXTI0_flag = 0;
+			if(!initalization_flag){
+				loading_TFT(MUSIC_BACKGROUND);
+				m_USART_DataSend(USART2, "AT+BTSCAN\r\n", send_buffer_);
+				initalization_flag = 1;
+			}
+		}else{
+			if(!initalization_flag){
+				//I2C MPR121
+				// enable I2C ER Interrupt
+				//m_Init_I2C_Clock(I2C1);
+				//m_Init_I2C_NVIC(I2C1, 0);
+			//	m_Init_MPR121_GPIO(GPIOB, GPIO_Pin_6, 1);
+			//	m_Init_MPR121_GPIO(GPIOB, GPIO_Pin_7, 1);
+			//	m_Init_MPR121_GPIO(GPIOE, GPIO_Pin_0, 0);
+			//	m_EXTI_GPIO_Interrupt(GPIO_PortSourceGPIOE, GPIO_PinSource0, EXTI_Line0,
+			//			EXTI0_IRQn); // IRQ
+			//	m_Init_MPR121_I2C(I2C1);
+			//	m_Init_MPR121();
+				//effect sounds
+				m_Init_MPR121_GPIO(GPIOD, GPIO_Pin_11, 0); // Press Button 1
+				m_Init_MPR121_GPIO(GPIOD, GPIO_Pin_12, 0); // Press Button 2
+				//base sounds
+				m_Init_MPR121_GPIO(GPIOC, GPIO_Pin_3, 0); // Selection Left
+				m_Init_MPR121_GPIO(GPIOC, GPIO_Pin_4, 0); // Selection Right
+				m_EXTI_GPIO_Interrupt(GPIO_PortSourceGPIOD, GPIO_PinSource11, EXTI_Line11,
+							EXTI15_10_IRQn);
+				m_EXTI_GPIO_Interrupt(GPIO_PortSourceGPIOD, GPIO_PinSource12, EXTI_Line12,
+							EXTI15_10_IRQn);
+
+
+				//TFT-LCD
+				m_Init_LCD_GPIO(GPIOC, GPIO_PinSource2, 0);
+				m_Init_LCD_GPIO(GPIOC, GPIO_PinSource5, 0);
+				m_EXTI_GPIO_Interrupt(GPIO_PortSourceGPIOC, GPIO_PinSource5, EXTI_Line5,
+						EXTI9_5_IRQn); // volume up
+				m_EXTI_GPIO_Interrupt(GPIO_PortSourceGPIOC, GPIO_PinSource2, EXTI_Line2,
+						EXTI2_IRQn); // volume down
+				m_Init_TIM_Clock(TIM2);
+				m_Init_TIM_NVIC(TIM2,0);
+				m_Init_LCD_TIM(TIM2);
+
+				Music_background(SPEAKER, TREBLE);
+				m_Init_TIM_Clock(TIM3);
+				m_Init_TIM_NVIC(TIM3,1);
+				m_Init_TIM(TIM3, PERIOD, PRESCALAR);
+
+				m_Init_PWM_GPIO(GPIOA, GPIO_Pin_6, 1);
+				m_Init_PWM_GPIO(GPIOA, GPIO_Pin_7, 1);
+				m_Init_PWM_GPIO(GPIOB, GPIO_Pin_0, 1);
+				m_Init_PWM_GPIO(GPIOB, GPIO_Pin_1, 1);
+
+				m_Init_PWM_TIM(TIM3, 1, 1, 1, 1);
+
+				m_Init_TIM_Clock(TIM4);
+				m_Init_TIM_NVIC(TIM4,0);
+				m_Init_LED_TIM(TIM4);
+				initalization_flag = 1;
+			}
 		}
 		if(BLUETOOTH_USART2_flag){
-			if(receive_offset != BT_STR_MAX_LENGTH){
-				receive_buffer_[receive_offset] = '\0';
+//			if(receive_offset != BT_STR_MAX_LENGTH){
+//				receive_buffer_[receive_offset] = '\0';
+//			}
+//			//LCD_ShowString(10,160,receive_buffer_, BLACK, WHITE);
+			if(BT_STATUS == BT_STATUS_MUSIC_PLAY){
+				requestMusic[0] = 'b';
+				if(GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_3)){
+					requestMusic[1] = '0';
+				}else{
+					requestMusic[1] = '1';
+				}
+				if(GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_4)){
+					requestMusic[2] = '0';
+				}else{
+					requestMusic[2] = '1';
+				}
+				requestMusic[3] = '\r';
+				requestMusic[4] = '\n';
+				m_USART_DataSend(USART2, requestMusic, send_buffer_);
 			}
-			LCD_ShowString(10, 160, receive_buffer_, BLACK, WHITE);
-			receive_offset = 0;
 			BLUETOOTH_USART2_flag = 0;
+			BT_STATUS = BT_STATUS_NONE;
+			receive_offset = 0;
+		}
+		if (Button_1_EXTI11_flag) {
+			m_USART_DataSend(USART2, "m0\r\n", send_buffer_);
+			Button_1_EXTI11_flag = 0;
+		}
+		if (Button_2_EXTI12_flag) {
+			m_USART_DataSend(USART2, "m1\r\n", send_buffer_);
+			Button_2_EXTI12_flag = 0;
 		}
 		if (Volume_UP_EXTI5_flag) {
 			printVolume(cur_volume, last_volume, 1);
 			last_volume = cur_volume;
 			Volume_UP_EXTI5_flag = 0;
-			m_USART_DataSend(USART2, "0\r\n", send_buffer_);
+			m_USART_DataSend(USART2,"v1\r\n", send_buffer_);
 		}
 		if (Volume_DOWN_EXTI2_flag) {
 			printVolume(cur_volume, last_volume, 0);
 			last_volume = cur_volume;
 			Volume_DOWN_EXTI2_flag = 0;
-		}
-		if (I2C1_ER_flag) {
-//			LCD_Clear(WHITE);
-//			LCD_ShowNum(100, 100, I2C1_ER_Status, 4, BLACK, WHITE);
-			I2C1_ER_flag = 0;
+			m_USART_DataSend(USART2, "v0\r\n", send_buffer_);
 		}
 		if (LCD_Refresh_TIM2_flag) {
 			//Show_LCD_Status();

@@ -27,137 +27,54 @@
 #define MPR121 I2C1
 
 // The default I2C address
-#define MPR121_I2CADDR_DEFAULT 		(volatile)0xB4 //Origin Address 0x5A. Modified according to 7bit addressing
-// The defalut buffer address
-#define BUFADDR_DEFAULT 			(volatile)0x00
+#define MPR121_I2CADDR_DEFAULT 0xB4 // 0xB4 0x5A
+#define MPR121_TOUCHSTATUS_L 0x00
+#define MPR121_TOUCHSTATUS_H 0x01
+#define MPR121_FILTDATA_0L  0x04
+#define MPR121_FILTDATA_0H  0x05
+#define MPR121_BASELINE_0   0x1E
+#define MPR121_MHDR         0x2B
+#define MPR121_NHDR         0x2C
+#define MPR121_NCLR         0x2D
+#define MPR121_FDLR         0x2E
+#define MPR121_MHDF         0x2F
+#define MPR121_NHDF         0x30
+#define MPR121_NCLF         0x31
+#define MPR121_FDLF         0x32
+#define MPR121_NHDT         0x33
+#define MPR121_NCLT         0x34
+#define MPR121_FDLT         0x35
 
-#define MPR121_TOUCHSTATUS_L 		(volatile)0x00
-#define MPR121_TOUCHSTATUS_H 		(volatile)0x01
-#define MPR121_FILTDATA_0L  		(volatile)0x04
-#define MPR121_FILTDATA_0H  		(volatile)0x05
-#define MPR121_BASELINE_0   		(volatile)0x1E
+#define MPR121_TOUCHTH_0    0x41
+#define MPR121_RELEASETH_0    0x42
+#define MPR121_DEBOUNCE 0x5B
+#define MPR121_CONFIG1 0x5C
+#define MPR121_CONFIG2 0x5D
+#define MPR121_CHARGECURR_0 0x5F
+#define MPR121_CHARGETIME_1 0x6C
+#define MPR121_ECR 0x5E
+#define MPR121_AUTOCONFIG0 0x7B
+#define MPR121_AUTOCONFIG1 0x7C
+#define MPR121_UPLIMIT   0x7D
+#define MPR121_LOWLIMIT  0x7E
+#define MPR121_TARGETLIMIT  0x7F
 
-//Rising filter
-#define MPR121_MHDR         		(volatile)0x2B
-#define MPR121_NHDR         		(volatile)0x2C
-#define MPR121_NCLR         		(volatile)0x2D
-#define MPR121_FDLR         		(volatile)0x2E
-
-//Falling filter
-#define MPR121_MHDF         		(volatile)0x2F
-#define MPR121_NHDF         		(volatile)0x30
-#define MPR121_NCLF         		(volatile)0x31
-#define MPR121_FDLF         		(volatile)0x32
-
-//Touched Filter
-#define MPR121_NHDT         		(volatile)0x33
-#define MPR121_NCLT         		(volatile)0x34
-#define MPR121_FDLT         		(volatile)0x35
-
-#define MPR121_MHDPROXR				(volatile)0x36
-#define MPR121_NHDPROXR				(volatile)0x37
-#define MPR121_NCLPROXR				(volatile)0x38
-#define MPR121_FDLPROXR				(volatile)0x39
-
-#define MPR121_MHDPROXF				(volatile)0x3A
-#define MPR121_NHDPROXF				(volatile)0x3B
-#define MPR121_NCLPROXF				(volatile)0x3C
-#define MPR121_FDLPROXF				(volatile)0x3D
-
-#define MPR121_NHDPROXT				(volatile)0x3E
-#define MPR121_NCLPROXT				(volatile)0x3F
-#define MPR121_FDLPROXT				(volatile)0x40
+#define MPR121_GPIODIR  0x76
+#define MPR121_GPIOEN  0x77
+#define MPR121_GPIOSET  0x78
+#define MPR121_GPIOCLR  0x79
+#define MPR121_GPIOTOGGLE  0x7A
 
 
-//Electrode touch and release thresholds
-#define MPR121_TOUCHTH_0    		(volatile)0x41
-#define MPR121_RELEASETH_0   		(volatile)0x42
-#define MPR121_TOUCHTH_1    		(volatile)0x43
-#define MPR121_RELEASETH_1   		(volatile)0x44
-#define MPR121_TOUCHTH_2    		(volatile)0x45
-#define MPR121_RELEASETH_2    		(volatile)0x46
-#define MPR121_TOUCHTH_3    		(volatile)0x47
-#define MPR121_RELEASETH_3    		(volatile)0x48
-#define MPR121_TOUCHTH_4    		(volatile)0x49
-#define MPR121_RELEASETH_4    		(volatile)0x4A
-#define MPR121_TOUCHTH_5    		(volatile)0x4B
-#define MPR121_RELEASETH_5    		(volatile)0x4C
-#define MPR121_TOUCHTH_6    		(volatile)0x4D
-#define MPR121_RELEASETH_6    		(volatile)0x4E
-#define MPR121_TOUCHTH_7    		(volatile)0x4F
-#define MPR121_RELEASETH_7    		(volatile)0x50
-#define MPR121_TOUCHTH_8    		(volatile)0x51
-#define MPR121_RELEASETH_8    		(volatile)0x52
-#define MPR121_TOUCHTH_9    		(volatile)0x53
-#define MPR121_RELEASETH_9    		(volatile)0x54
-#define MPR121_TOUCHTH_10    		(volatile)0x55
-#define MPR121_RELEASETH_10    		(volatile)0x56
-#define MPR121_TOUCHTH_11    		(volatile)0x57
-#define MPR121_RELEASETH_11    		(volatile)0x58
-
-
-//Debounce Setting
-#define MPR121_DEBOUNCE 			(volatile)0x5B
-
-//Configuration Register
-#define MPR121_CONFIG_AFE			(volatile)0x5C
-#define MPR121_CONFIG_FILTER 		(volatile)0x5D
-#define MPR121_ECR 					(volatile)0x5E
-
-//Electrode Current
-#define MPR121_CHARGECURR_0 		(volatile)0x5F
-#define MPR121_CHARGECURR_1 		(volatile)0x60
-#define MPR121_CHARGECURR_2 		(volatile)0x61
-#define MPR121_CHARGECURR_3 		(volatile)0x62
-#define MPR121_CHARGECURR_4 		(volatile)0x63
-#define MPR121_CHARGECURR_5 		(volatile)0x64
-#define MPR121_CHARGECURR_6 		(volatile)0x65
-#define MPR121_CHARGECURR_7 		(volatile)0x66
-#define MPR121_CHARGECURR_8 		(volatile)0x67
-#define MPR121_CHARGECURR_9 		(volatile)0x68
-#define MPR121_CHARGECURR_10 		(volatile)0x69
-#define MPR121_CHARGECURR_11 		(volatile)0x6A
-#define MPR121_CHARGECURR_12 		(volatile)0x6B
-
-//Electrode Charge Times
-#define MPR121_CHARGETIME_01 		(volatile)0x6C
-#define MPR121_CHARGETIME_23 		(volatile)0x6D
-#define MPR121_CHARGETIME_45 		(volatile)0x6E
-#define MPR121_CHARGETIME_67 		(volatile)0x6F
-#define MPR121_CHARGETIME_89 		(volatile)0x70
-#define MPR121_CHARGETIME_1011 		(volatile)0x71
-#define MPR121_CHARGETIME_12 		(volatile)0x72
-
-//Auto Configuration Register
-#define MPR121_AUTOCONFIG0 			(volatile)0x7B
-#define MPR121_AUTOCONFIG1 			(volatile)0x7C
-#define MPR121_UPLIMIT   			(volatile)0x7D
-#define MPR121_LOWLIMIT  			(volatile)0x7E
-#define MPR121_TARGETLIMIT  		(volatile)0x7F
-
-#define MPR121_GPIODIR  			(volatile)0x76
-#define MPR121_GPIOEN  				(volatile)0x77
-#define MPR121_GPIOSET  			(volatile)0x78
-#define MPR121_GPIOCLR  			(volatile)0x79
-#define MPR121_GPIOTOGGLE  			(volatile)0x7A
-
-#define MPR121_SOFTRESET 			(volatile)0x80
-#define MPR121_TH_TOUCH				(volatile)0x0F
-#define MPR121_TH_RELEASE			(volatile)0x0A
-
-
-void begin(uint8_t* buffer_);
-
-uint16_t filteredData(uint8_t addr, uint8_t* buffer, uint8_t t);
-uint16_t baselineData(uint8_t addr, uint8_t* buffer, uint8_t t);
-
-uint8_t readRegister8(uint8_t addr, uint8_t reg, uint8_t* buffer);
-uint16_t readRegister16(uint8_t addr, uint8_t reg, uint8_t* buffer);
-//void writeRegister(uint8_t addr, uint8_t* buffer, uint8_t reg, uint8_t value);
-uint16_t touched(uint8_t addr, uint8_t* buffer);
-void MPR121_I2C_ByteWrite(uint8_t slaveAddr, uint8_t writeAddr, uint8_t value);
-void MPR121_I2C_BufferRead(u8 slaveAddr, u8* buffer, u8 readAddr, u16 NumByteToRead);
-//uint8_t I2CADDR;
-//uint8_t BUFFER;
+#define MPR121_SOFTRESET 0x80
+/*
+uint8_t begin_MPR121(void);
+void setThreshold(uint8_t touch, uint8_t release);
+//uint16_t filteredData(uint8_t t);
+//uint16_t baselineData(uint8_t t);
+uint16_t touched(void);
+uint8_t readRegister8(uint8_t reg);
+uint16_t readRegister16(uint8_t reg);
+void writeRegister(uint8_t reg, uint8_t value);*/
 
 #endif // ADAFRUIT_MPR121_H

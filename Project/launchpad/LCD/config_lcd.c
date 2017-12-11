@@ -113,3 +113,15 @@ void m_Init_LCD_TIM(TIM_TypeDef* TIMx){
 	TIM_Cmd(TIMx, ENABLE);
 	TIM_ITConfig(TIMx, TIM_IT_Update, ENABLE);
 }
+
+void m_Init_LCD_GPIO(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pinx, uint8_t flag){
+	GPIO_InitTypeDef gpio_init_;
+	gpio_init_.GPIO_Pin = GPIO_Pinx;
+	gpio_init_.GPIO_Speed = GPIO_Speed_50MHz;
+	if(flag){
+		gpio_init_.GPIO_Mode = GPIO_Mode_AF_OD;
+	}else{
+		gpio_init_.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+	}
+	GPIO_Init(GPIOx, &gpio_init_);
+}

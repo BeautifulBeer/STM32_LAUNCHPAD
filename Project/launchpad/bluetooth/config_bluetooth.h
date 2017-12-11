@@ -15,9 +15,12 @@
 #include <string.h>
 #include <stdlib.h>
 
-#define BT_STR_MAX_LENGTH  			512
-#define BT_STATUS_SYSTEM_UNSTART		0
-#define BT_STATUS_SYSTEM_START			1
+#define BT_STR_MAX_LENGTH  				512
+#define BT_STATUS_SYSTEM_UNSTART		0xF9
+#define BT_STATUS_SYSTEM_START			0xFA
+#define BT_STATUS_MUSIC_PLAY			0xFB
+#define BT_STATUS_NONE					0xFC
+
 
 /*
  *
