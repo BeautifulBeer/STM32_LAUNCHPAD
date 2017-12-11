@@ -13,10 +13,10 @@
 
 
 
-void m_Init_MPR121(uint8_t* buffer_);
+//void m_Init_MPR121(void);
 //flag : 1 - Alternative push pull , flag : 0 - Input mode
 void m_Init_MPR121_GPIO(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pinx, uint8_t flag);
-void m_Init_MPR121_I2C(I2C_TypeDef *I2Cx);
-void m_printState(uint16_t lasttouched, uint16_t currtouched, uint8_t* buffer);
+//void m_Init_MPR121_I2C(I2C_TypeDef *I2Cx);
+//void m_printState(uint16_t lasttouched, uint16_t currtouched);
 
 #endif /* CONFIG_MPR121_H_ */

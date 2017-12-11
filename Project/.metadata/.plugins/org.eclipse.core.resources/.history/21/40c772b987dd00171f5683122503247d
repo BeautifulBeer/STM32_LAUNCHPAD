@@ -1,0 +1,18 @@
+/*
+ * config_lcd.h
+ *
+ *  Created on: 2017. 12. 10.
+ *      Author: hw_4
+ */
+
+#ifndef CONFIG_LCD_H_
+#define CONFIG_LCD_H_
+
+
+
+void Music_background(void);
+void removeObject(uint16_t x_pos, uint16_t y_pos, const uint16_t* obj);
+void printObject(uint16_t x_pos, uint16_t y_pos, const uint16_t* obj);
+void printVolumeBar(uint8_t volume);
+.void removeVolumeBar(uint8_t volume);
+#endif /* CONFIG_LCD_H_ */

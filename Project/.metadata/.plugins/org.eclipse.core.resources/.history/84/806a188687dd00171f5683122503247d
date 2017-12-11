@@ -1,0 +1,14 @@
+/*
+ * config_lcd.h
+ *
+ *  Created on: 2017. 12. 10.
+ *      Author: hw_4
+ */
+
+#ifndef CONFIG_LCD_H_
+#define CONFIG_LCD_H_
+
+
+
+void Music_background();
+#endif /* CONFIG_LCD_H_ */

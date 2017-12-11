@@ -7,7 +7,8 @@ System Clock = 72MHz
 
 
 ## Interrupt Priority(PreemptionPriority/SubPriority)
-
+### LCD Refresher 0
+### PWM - 1
 ## Port Specification
 ### PE0, PB6, PB7 - MPR121
 ### PA7 - NeoPixel

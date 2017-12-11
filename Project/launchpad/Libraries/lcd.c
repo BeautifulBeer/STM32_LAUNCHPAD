@@ -136,6 +136,12 @@ void LCD_DrawPoint(uint16_t xsta, uint16_t ysta)
 	LCD_WR_REG(0x22);           
 	LCD_WR_DATA(POINT_COLOR);
 }
+void LCD_ClearPoint(uint16_t xsta, uint16_t ysta)
+{
+	LCD_SetCursor(xsta,ysta);
+	LCD_WR_REG(0x22);
+	LCD_WR_DATA(POINT_COLOR2);
+}
 
 /**					
 	LCD_WindowMax()

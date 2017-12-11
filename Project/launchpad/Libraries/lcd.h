@@ -12,6 +12,7 @@
 
 /*Private define-------------------------*/
 #define POINT_COLOR BLACK
+#define POINT_COLOR2 WHITE
 #define BACK_COLOR	0xFFFF
 /*--------Color---------------*/
 #define WHITE         	 0xFFFF
@@ -34,6 +35,7 @@ void LCD_DrawLine(uint16_t xsta, uint16_t ysta, uint16_t xend, uint16_t yend);
 void Draw_Circle(uint16_t x0, uint16_t y0, uint8_t r);
 void LCD_DrawRectangle(uint16_t xsta, uint16_t ysta, uint16_t xend, uint16_t yend);
 void LCD_DrawPoint(uint16_t xsta, uint16_t ysta);
+void LCD_ClearPoint(uint16_t xsta, uint16_t ysta);
 void LCD_WindowMax (unsigned int x,unsigned int y,unsigned int x_end,unsigned int y_end);
 void Delay_10ms(int time);
 void LCD_ShowString(u16 x0, u16 y0, u8 *pcStr, u16 PenColor, u16 BackColor);

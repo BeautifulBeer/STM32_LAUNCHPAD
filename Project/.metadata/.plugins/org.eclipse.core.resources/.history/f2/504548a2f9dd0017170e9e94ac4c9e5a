@@ -1,0 +1,138 @@
+/***************************************************
+ This is a library for the MPR121 I2C 12-chan Capacitive Sensor
+
+ Designed specifically to work with the MPR121 sensor from Adafruit
+ ----> https://www.adafruit.com/products/1982
+
+ These sensors use I2C to communicate, 2+ pins are required to
+ interface
+ Adafruit invests time and resources providing this open source code,
+ please support Adafruit and open-source hardware by purchasing
+ products from Adafruit!
+
+ Written by Limor Fried/Ladyada for Adafruit Industries.
+ BSD license, all text above must be included in any redistribution
+ ****************************************************/
+
+#include "Adafruit_MPR121.h"
+
+
+uint8_t begin_MPR121(void){
+	int i;
+	uint8_t c;
+	writeRegister(MPR121_SOFTRESET, 0x63);
+	for(i=0; i<1170; i++){
+
+	}
+	writeRegister(MPR121_ECR, 0x0);
+
+	c = readRegister8(MPR121_CONFIG2);
+
+	if (c != 0x24) return 0;
+
+
+	setThreshold(12, 6);
+	writeRegister(MPR121_MHDR, 0x01);
+	writeRegister(MPR121_NHDR, 0x01);
+	writeRegister(MPR121_NCLR, 0x0E);
+	writeRegister(MPR121_FDLR, 0x00);
+
+	writeRegister(MPR121_MHDF, 0x01);
+	writeRegister(MPR121_NHDF, 0x05);
+	writeRegister(MPR121_NCLF, 0x01);
+	writeRegister(MPR121_FDLF, 0x00);
+
+	writeRegister(MPR121_NHDT, 0x00);
+	writeRegister(MPR121_NCLT, 0x00);
+	writeRegister(MPR121_FDLT, 0x00);
+
+	writeRegister(MPR121_DEBOUNCE, 0);
+	writeRegister(MPR121_CONFIG1, 0x10); // default, 16uA charge current
+	writeRegister(MPR121_CONFIG2, 0x20); // 0.5uS encoding, 1ms period
+
+	//  writeRegister(MPR121_AUTOCONFIG0, 0x8F);
+
+	//  writeRegister(MPR121_UPLIMIT, 150);
+	//  writeRegister(MPR121_TARGETLIMIT, 100); // should be ~400 (100 shifted)
+	//  writeRegister(MPR121_LOWLIMIT, 50);
+	// enable all electrodes
+	writeRegister(MPR121_ECR, 0x8F);  // start with first 5 bits of baseline tracking
+
+	return 1;
+}
+void setThreshold(uint8_t touch, uint8_t release){
+	int i;
+	for(i=0; i<12; i++){
+		writeRegister(MPR121_TOUCHTH_0 + 2*i, touch);
+		writeRegister(MPR121_RELEASETH_0 + 2*i, release);
+	}
+
+}
+uint16_t touched(void){
+	uint16_t t = readRegister16(MPR121_TOUCHSTATUS_L);
+	return t & 0x0FFF;
+}
+uint8_t readRegister8(uint8_t reg){
+	uint8_t data;
+	while(I2C_GetFlagStatus(MPR121, I2C_FLAG_BUSY));
+	I2C_GenerateSTART(MPR121, ENABLE);
+	while(!I2C_CheckEvent(MPR121, I2C_EVENT_MASTER_MODE_SELECT));
+	I2C_Send7bitAddress(MPR121, MPR121_I2CADDR_DEFAULT, I2C_Direction_Transmitter);
+	while(!I2C_CheckEvent(MPR121, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED));
+	I2C_SendData(MPR121, reg);
+	while(!I2C_CheckEvent(MPR121, I2C_EVENT_MASTER_BYTE_TRANSMITTED));
+	I2C_GenerateSTART(MPR121, ENABLE);
+	while(!I2C_CheckEvent(MPR121, I2C_EVENT_MASTER_MODE_SELECT));
+	I2C_Send7bitAddress(MPR121, MPR121_I2CADDR_DEFAULT, I2C_Direction_Receiver);
+	while(!I2C_CheckEvent(MPR121,I2C_EVENT_MASTER_BYTE_RECEIVED));
+	data = I2C_ReceiveData(MPR121);
+	while(!I2C_CheckEvent(MPR121, I2C_EVENT_MASTER_BYTE_RECEIVED));
+	I2C_AcknowledgeConfig(MPR121, DISABLE);
+	I2C_GenerateSTOP(MPR121, ENABLE);
+	while(I2C_GetFlagStatus(MPR121, I2C_FLAG_BUSY));
+	return data;
+}
+uint16_t readRegister16(uint8_t reg){
+	uint16_t data = 0;
+	int i;
+	while(I2C_GetFlagStatus(MPR121, I2C_FLAG_BUSY));
+	I2C_GenerateSTART(MPR121, ENABLE);
+	while(!I2C_CheckEvent(MPR121, I2C_EVENT_MASTER_MODE_SELECT));
+	I2C_Send7bitAddress(MPR121, MPR121_I2CADDR_DEFAULT, I2C_Direction_Transmitter);
+	while(!I2C_CheckEvent(MPR121, I2C_EVENT_SLAVE_RECEIVER_ADDRESS_MATCHED));
+	while(!I2C_CheckEvent(MPR121, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED));
+	I2C_SendData(MPR121, reg);
+	while(!I2C_CheckEvent(MPR121, I2C_EVENT_MASTER_BYTE_TRANSMITTED));
+	I2C_GenerateSTOP(MPR121, ENABLE);
+	I2C_GenerateSTART(MPR121, ENABLE);
+	while(!I2C_CheckEvent(MPR121, I2C_EVENT_MASTER_MODE_SELECT));
+	I2C_Send7bitAddress(MPR121, MPR121_I2CADDR_DEFAULT, I2C_Direction_Receiver);
+	while (!I2C_CheckEvent(MPR121, I2C_EVENT_MASTER_RECEIVER_MODE_SELECTED));
+	I2C_AcknowledgeConfig(MPR121, ENABLE);
+	for(i=1; i>=0; i--) {
+		I2C_AcknowledgeConfig(MPR121, DISABLE);
+		while(!I2C_CheckEvent(MPR121, I2C_EVENT_MASTER_BYTE_RECEIVED));
+		data |= I2C_ReceiveData(MPR121) << i*8;
+	}
+	I2C_AcknowledgeConfig(MPR121, DISABLE);
+	I2C_GenerateSTOP(MPR121, ENABLE);
+	while(I2C_GetFlagStatus(MPR121, I2C_FLAG_BUSY));
+	return data;
+}
+void writeRegister(uint8_t reg, uint8_t value){
+	I2C_GenerateSTART(MPR121, ENABLE);
+	while(!I2C_CheckEvent(MPR121, I2C_EVENT_MASTER_MODE_SELECT));
+	I2C_Send7bitAddress(MPR121, MPR121_I2CADDR_DEFAULT, I2C_Direction_Transmitter);
+	while(!I2C_CheckEvent(MPR121, I2C_EVENT_SLAVE_RECEIVER_ADDRESS_MATCHED));
+	while(!I2C_CheckEvent(MPR121, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED));
+	I2C_SendData(MPR121, reg);
+	while(!I2C_CheckEvent(MPR121, I2C_EVENT_SLAVE_BYTE_RECEIVED | I2C_FLAG_DUALF));
+	while(!I2C_CheckEvent(MPR121, I2C_EVENT_MASTER_BYTE_TRANSMITTED));
+	I2C_SendData(MPR121, value);
+	while(!I2C_CheckEvent(MPR121, I2C_EVENT_SLAVE_BYTE_RECEIVED | I2C_FLAG_DUALF));
+	while(!I2C_CheckEvent(MPR121, I2C_EVENT_MASTER_BYTE_TRANSMITTED));
+	I2C_GenerateSTOP(MPR121, ENABLE);
+	while(I2C_GetFlagStatus(MPR121, I2C_FLAG_BUSY));
+}
+
+
