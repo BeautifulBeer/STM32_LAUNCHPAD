@@ -13,18 +13,18 @@
 #include <stm32f10x_tim.h>
 #include <stm32f10x_gpio.h>
 
-#define SYS_CLK					 	(volatile)40000000
-#define TIMER_CLK					(volatile)(SYS_CLK / 1)
-#define PWM_FREQ 					(volatile)833333  //1.2us
+#define SYS_CLK					 	40000000
+#define TIMER_CLK					(SYS_CLK / 1)
+#define PWM_FREQ 					833333  //1.2us
 //#define PRESCALAR 					(SYS_CLK / TIMER_FREQ - 1)
-#define PRESCALAR 					(volatile)0
-#define PERIOD						(volatile)47//((TIMER_CLK / PWM_FREQ - 1))
+#define PRESCALAR 					0
+#define PERIOD						47//((TIMER_CLK / PWM_FREQ - 1))
 
-#define DUTY_0						(volatile)0//(PERIOD * (25 / 100))
-#define DUTY_25						(volatile)11//(PERIOD * (25 / 100))
-#define DUTY_50						(volatile)23//(PERIOD * (50 / 100))
-#define DUTY_75						(volatile)35//(PERIOD * (75 / 100))
-#define DUTY_100					(volatile)47//PERIOD
+#define DUTY_0						0//(PERIOD * (25 / 100))
+#define DUTY_25						11//(PERIOD * (25 / 100))
+#define DUTY_50						23//(PERIOD * (50 / 100))
+#define DUTY_75						35//(PERIOD * (75 / 100))
+#define DUTY_100					47//PERIOD
 #define BIT_1						DUTY_50
 #define BIT_0						DUTY_25
 #define RESET						DUTY_0

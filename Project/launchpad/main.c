@@ -30,7 +30,8 @@
  * Global variables
  */
 
-uint8_t systemStart_flag;
+//System states
+uint8_t systemStart_flag; 
 uint8_t initalization_flag;
 
 //TFT LCD Variables
@@ -42,11 +43,18 @@ uint8_t last_volume;
 uint8_t cur_volume;
 uint32_t DestAddr;
 
+/*
+	All drawings are represented as uint16_t array. Each value of array denotes position
+	should be colored with black. 
+*/
+
+//16 X CONST_MUSIC_NOTE_ROW music note drawing
 uint16_t MUSIC_NOTE[CONST_MUSIC_NOTE_ROW] = { 0x0000, 0x1FFE, 0x1FFE, 0x1806,
 		0x1806, 0x1FFE, 0x1FFE, 0x1806, 0x1806, 0x1806, 0x1806, 0x1806, 0x1806,
 		0x1806, 0x1806, 0x1806, 0x180E, 0x181F, 0x383F, 0x7C3F, 0xFC1E, 0xFC0C,
 		0x7800, 0x3000 };
 
+//(16*CONST_TREBLE_ROW) X CONST_TREBLE_COL treble drawing
 uint16_t TREBLE[CONST_TREBLE_ROW][CONST_TREBLE_COL] = {
 		{0x0, 0x1000},
 		{0x0, 0x7000},
@@ -130,12 +138,15 @@ uint16_t TREBLE[CONST_TREBLE_ROW][CONST_TREBLE_COL] = {
 		{0x3, 0x8000},
 };
 
+//(16*CONST_TREBLE_ROW) X CONST_MUSIC_NOTE_ROW speaker drawing
 uint16_t SPEAKER[CONST_MUSIC_NOTE_ROW] = {
 		0x0000, 0x0000, 0x001C, 0x003C, 0x00FC, 0x01FC, 0x3FFC,
 		0x3FFC, 0x3FFC, 0x3FFC, 0x3FFC, 0x3FFC, 0x3FFC, 0x3FFC,
 		0x3FFC, 0x3FFC, 0x3FFC, 0x3FFC, 0x3FFC, 0x01FC, 0x00FC, 0x003C,
 		0x0000, 0x0000
 };
+
+// Waiting screen for this application
 uint16_t MUSIC_BACKGROUND[TFT_BACKGROUND_HEIGHT][TFT_BACKGROUND_WIDTH] = {
 		{0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xd000, 0x0, 0x0},
 		{0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x1, 0xb000, 0x0, 0x0},
@@ -427,6 +438,7 @@ uint16_t MUSIC_BACKGROUND[TFT_BACKGROUND_HEIGHT][TFT_BACKGROUND_WIDTH] = {
 		{0x0, 0x4, 0x80, 0x0, 0x1001, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0},
 };
 
+
 int LCD_Refresh_TIM2_flag;
 int Volume_DOWN_EXTI2_flag;
 int Volume_UP_EXTI5_flag;
@@ -434,12 +446,12 @@ int Volume_UP_EXTI5_flag;
 
 
 //I2C Variables
-uint16_t lasttouched;
-uint16_t currtouched;
-uint8_t I2C_Buffer[MPR121_BUFFER_SIZE];
-int MPR121_IRQ_EXTI0_flag;
-int I2C1_ER_flag;
-int I2C1_ER_Status;
+// uint16_t lasttouched;
+// uint16_t currtouched;
+// uint8_t I2C_Buffer[MPR121_BUFFER_SIZE];
+// int MPR121_IRQ_EXTI0_flag;
+// int I2C1_ER_flag;
+// int I2C1_ER_Status;
 
 
 //PWM
@@ -454,14 +466,16 @@ uint8_t PIXEL_PATTERN_1[CONST_PIXEL_NUM][CONST_RGB_NUM] = {
 //Bluetooth Flag
 int Button_1_EXTI11_flag;
 int Button_2_EXTI12_flag;
-int Button_3_EXTI13_flag;
 uint8_t BLUETOOTH_USART2_flag;
+//The states are defined in 'bluetooth/config_bluetooth.h'
 uint8_t BT_STATUS;
 uint16_t receive_offset;
 uint8_t receive_buffer_[BT_STR_MAX_LENGTH];
 char send_buffer_[BT_STR_MAX_LENGTH];
+//Data buffer for bluetooth music request 
 char requestMusic[5];
 
+//Bluetooth Music Request
 void EXTI15_10_IRQHandler(void){
 	if (EXTI_GetITStatus(EXTI_Line11) == SET) {
 		Button_1_EXTI11_flag = 1;
@@ -508,6 +522,9 @@ void TIM4_IRQHandler(void){
 }
 
 //PWM
+/*
+	This handler is 
+*/
 void TIM3_IRQHandler(void) {
 	if (TIM_GetITStatus(TIM3, TIM_IT_CC2) == SET) {
 		if (cur_pixel != CONST_PIXEL_NUM) {
@@ -620,7 +637,7 @@ int main() {
 
 	//System Configuration Initialization
 	SysInit();
-	SetSysClock();
+	SetSysClock(); // 40MHz
 
 	//Clock Enable
 	m_Init_GPIO_Clock(GPIOA);
@@ -634,9 +651,7 @@ int main() {
 	//LED
 	Configure_LED();
 
-
 	//Bluetooth
-
 	m_Init_USART2_Clock();
 	m_Init_USART1_Clock();
 	m_Init_BT_USART1_GPIOA();
@@ -646,11 +661,8 @@ int main() {
 	m_Init_USART2_NVIC();
 	m_Init_USART1_NVIC();
 
+	//TFT_LCD
 	LCD_Init();
-
-
-	//Timer PWM PA7 Should be selected
-
 
 	//Main Loop
 	while (1) {
@@ -684,7 +696,6 @@ int main() {
 							EXTI15_10_IRQn);
 				m_EXTI_GPIO_Interrupt(GPIO_PortSourceGPIOD, GPIO_PinSource12, EXTI_Line12,
 							EXTI15_10_IRQn);
-
 
 				//TFT-LCD
 				m_Init_LCD_GPIO(GPIOC, GPIO_PinSource2, 0);

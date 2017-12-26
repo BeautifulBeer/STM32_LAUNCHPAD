@@ -5,7 +5,7 @@
 ## Project Directory Description
 ### BluetoothApp
 - Bluetooth : Bluetooth SPP is implemented.
-- MusicPlay : Playing music with `MediaPlayer` and Adjusting android's audio volume with `AudioManager`. This class is triggered by STM32F107 signal during bluetooth communication.
+- MusicPlay : Playing music with `MediaPlayer` and adjusting android's audio volume with `AudioManager`. This class is triggered by STM32F107 signal during bluetooth communication.
 
 ### Project
 - Libraries : _STM32F10x_StdPeriph_Driver_v3.5_ is used

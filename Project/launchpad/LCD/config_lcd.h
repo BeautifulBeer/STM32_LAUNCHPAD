@@ -2,7 +2,7 @@
  * config_lcd.h
  *
  *  Created on: 2017. 12. 10.
- *      Author: hw_4
+ *  Author: Kwanwoong Yoon
  */
 
 #ifndef CONFIG_LCD_H_
@@ -38,11 +38,17 @@
 #define _BV(bit) (1 << (bit))
 
 
+//Loading waiting screen
 void loading_TFT(uint16_t data[][TFT_BACKGROUND_WIDTH]);
+//Loading background of main screen
 void Music_background(uint16_t* SPEAKER, uint16_t TREBLE[][CONST_TREBLE_COL]);
+//Remove Object from lcd screen except music background
 void removeObject(uint16_t x_pos, uint16_t y_pos, const uint16_t* obj);
+//Draw Object on lcd screen
 void printObject(uint16_t x_pos, uint16_t y_pos, const uint16_t* obj);
+//Draw Volumebar
 void printVolumeBar(uint8_t volume);
+//Remove Volumebar
 void removeVolumeBar(uint8_t volume);
 //Volume bar y : 8 , x : 20 , gap : 2, increment : 2
 //up_down - up : 1 , down : 0

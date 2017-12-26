@@ -2,7 +2,8 @@
  * config_bluetooth.h
  *
  *  Created on: 2017. 11. 24.
- *      Author: hw_3
+ *  Author: Kwanwoong Yoon
+ *	
  */
 
 #ifndef CONFIG_BLUETOOTH_H_
@@ -32,16 +33,6 @@
  *
  * AT+BTSCAN
  *
- */
-
-/*
- * Data transmission Protocol
- *
- * BD + BD + CR + LF + Data length
- * 	SD
- * 		{DATA} - String, Max length : 512
- * 	ED
- * LF + CR + BD + BD
  */
 
 #define CR 0x0D //Carriage return
